@@ -63,8 +63,9 @@ export interface VerifyForgotPasswordOtpResponse {
 }
 
 export interface ResetPasswordPayload {
-  email: string;
+
   password: string;
+  confirmPassword: string;
 }
 
 export interface ResetPasswordResponse {
