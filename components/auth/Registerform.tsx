@@ -42,7 +42,7 @@ export default function RegisterForm() {
       `/verify-email?email=${encodeURIComponent(response.email)}`
     );
 
-  } catch (error) {
+  } catch (error:any) {
     console.error(error);
       if (error.response) {
     console.log("Status:", error.response?.status);
