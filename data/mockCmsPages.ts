@@ -1,0 +1,40 @@
+import { CmsPage } from "@/types/cms";
+
+export const mockCmsPages: CmsPage[] = [
+  {
+    id: 1,
+    title: "Home",
+    slug: "home",
+    shortDescription: "Homepage",
+    content: "<h1>Home Page</h1>",
+    seoTitle: "Home",
+    seoDescription: "Welcome to our website.",
+    status: "Published",
+    author: "Super Admin",
+    updatedAt: "06 Jul 2026",
+  },
+  {
+    id: 2,
+    title: "About Us",
+    slug: "about-us",
+    shortDescription: "About company",
+    content: "<h1>About Us</h1>",
+    seoTitle: "About Us",
+    seoDescription: "Know more about us.",
+    status: "Draft",
+    author: "Admin",
+    updatedAt: "05 Jul 2026",
+  },
+  {
+    id: 3,
+    title: "Privacy Policy",
+    slug: "privacy-policy",
+    shortDescription: "Privacy policy",
+    content: "<h1>Privacy Policy</h1>",
+    seoTitle: "Privacy Policy",
+    seoDescription: "Privacy details.",
+    status: "Published",
+    author: "Editor",
+    updatedAt: "04 Jul 2026",
+  },
+];
