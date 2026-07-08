@@ -60,6 +60,7 @@ export interface VerifyForgotPasswordOtpPayload {
 export interface VerifyForgotPasswordOtpResponse {
   success: boolean;
   message: string;
+  data:any;
 }
 
 export interface ResetPasswordPayload {

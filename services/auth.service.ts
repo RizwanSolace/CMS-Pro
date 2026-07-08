@@ -109,7 +109,7 @@ resendVerificationOtp: async (
   );
 
   return data;
-} catch (error) {
+} catch (error:any) {
       console.log("Status:", error.response?.status);
   console.log("Data:", error.response?.data);
   console.error(error);
