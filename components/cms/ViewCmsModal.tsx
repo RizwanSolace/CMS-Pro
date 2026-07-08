@@ -2,17 +2,7 @@
 
 import Modal from "@/components/common/Modal";
 
-interface CmsPage {
-  title: string;
-  slug: string;
-  description: string;
-  content: string;
-  seoTitle: string;
-  seoDescription: string;
-  status: string;
-  author: string;
-  updatedAt: string;
-}
+import { CmsPage } from "@/types/cms";
 
 interface ViewCmsModalProps {
   open: boolean;

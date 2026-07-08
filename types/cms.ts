@@ -5,7 +5,7 @@ export interface CmsPage {
 
   slug: string;
 
-  shortDescription: string;
+  description: string;
 
   content: string;
 
