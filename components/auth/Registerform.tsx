@@ -8,10 +8,15 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import Input from "@/components/common/Input";
 import PasswordInput from "@/components/common/PasswordInput";
 import Button from "@/components/common/Button";
+import {
+  applyApiValidationErrors,
+  getApiErrorMessage,
+} from "@/lib/api-response";
 import { useRouter } from "next/navigation";
 
 import {toSignupPayload} from  "@/lib/mappers/auth.mapper";
 import { authService } from "@/services/auth.service";
+import { toast } from "react-toastify";
 
 import {registerSchema,RegisterFormData}  from "@/lib/validation/auth";
 
@@ -20,6 +25,7 @@ export default function RegisterForm() {
   const {
     register,
     handleSubmit,
+    setError,
     formState: { errors, isSubmitting },
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
@@ -35,30 +41,20 @@ export default function RegisterForm() {
 
   const onSubmit = async (data: RegisterFormData) => {
     try {
-    const response = toSignupPayload(data);
-    await authService.register(response)
+    const payload = toSignupPayload(data);
+    const response = await authService.register(payload);
+    toast.success(response.message || "Account created successfully.");
 
     router.push(
-      `/verify-email?email=${encodeURIComponent(response.email)}`
+      `/verify-email?email=${encodeURIComponent(payload.email)}`
     );
 
-  } catch (error:any) {
-    console.error(error);
-      if (error.response) {
-    console.log("Status:", error.response?.status);
-  console.log("Data:", error.response?.data);
-  console.log("Headers:", error.response?.headers);
-  console.log("Full Error:", error);
-    alert(error.response.data.message);
-  } else {
-    alert("Something went wrong");
+  } catch (error) {
+    applyApiValidationErrors(error, setError, {
+      name: "firstName",
+    });
+    toast.error(getApiErrorMessage(error, "Registration failed. Please try again."));
   }
-  }
-
-    // TODO:
-    // await authService.register(data);
-
-    // Redirect to login page
   };
 
   return (

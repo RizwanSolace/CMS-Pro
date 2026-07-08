@@ -11,6 +11,11 @@ import {
 
 import { authService } from "@/services/auth.service";
 import { toast} from "react-toastify";
+import {
+  getApiErrorMessage,
+  getApiFieldError,
+  getApiSuccessMessage,
+} from "@/lib/api-response";
 
 export default function VerifyForgotPasswordForm() {
   const searchParams = useSearchParams();
@@ -20,8 +25,18 @@ export default function VerifyForgotPasswordForm() {
 
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
+  const [verifying, setVerifying] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
 
 const handleResendOtp = async () => {
+  setErrorMessage("");
+  setSuccessMessage("");
+  if (!email) {
+    setErrorMessage("Email address is missing. Please try forgot password again.");
+    return;
+  }
+
   try {
     setLoading(true);
 
@@ -30,12 +45,14 @@ const handleResendOtp = async () => {
         email,
       });
 
-    console.log(response);
+    const message = getApiSuccessMessage(response, "OTP sent successfully.");
 
-    alert("OTP sent successfully.");
+    setSuccessMessage(message);
+    toast.success(message);
   } catch (error) {
-    console.error(error);
-    alert("Unable to resend OTP.");
+    const message = getApiErrorMessage(error, "Unable to resend OTP.");
+    setErrorMessage(getApiFieldError(error, "email") || message);
+    toast.error(message);
   } finally {
     setLoading(false);
   }
@@ -43,8 +60,16 @@ const handleResendOtp = async () => {
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMessage("");
+    setSuccessMessage("");
+
+    if (otp.length !== 6) {
+      setErrorMessage("Please enter the 6-digit OTP.");
+      return;
+    }
 
     try {
+    setVerifying(true);
     const response=await authService.verifyForgotPasswordOtp({
         email,
         otp,
@@ -53,19 +78,21 @@ const handleResendOtp = async () => {
   "resetToken",
   response.data.resetToken
 );
-      console.log("Verify OTP Response:", response);
-toast("OTP verified successfully. Redirecting to reset password page.", {
-  type: "success",
-  autoClose: 3000, // Close after 3 seconds
-});
+toast.success(response.message || "OTP verified successfully.");
 
       router.push(
-        `/reset-password?email=${email}`
+        `/reset-password?email=${encodeURIComponent(email)}`
       );
-    } catch (error:any) {
-      console.log("Status:", error.response?.status);
-  console.log("Data:", error.response?.data);
-  console.error(error);
+    } catch (error) {
+      const message = getApiErrorMessage(error, "OTP verification failed.");
+      setErrorMessage(
+        getApiFieldError(error, "otp") ||
+          getApiFieldError(error, "email") ||
+          message
+      );
+      toast.error(message);
+    } finally {
+      setVerifying(false);
     }
   };
 
@@ -100,10 +127,21 @@ toast("OTP verified successfully. Redirecting to reset password page.", {
     </div>
   )}
       />
+      {errorMessage && (
+        <p className="text-sm text-red-500">
+          {errorMessage}
+        </p>
+      )}
+      {successMessage && (
+        <p className="text-sm text-green-600">
+          {successMessage}
+        </p>
+      )}
 
       <Button
         type="submit"
         className="w-full"
+        loading={verifying}
       >
         Verify OTP
       </Button>

@@ -5,6 +5,10 @@ import { useRouter } from "next/navigation";
 
 import Input from "@/components/common/Input";
 import Button from "@/components/common/Button";
+import {
+  getApiErrorMessage,
+  getApiFieldError,
+} from "@/lib/api-response";
 import { authService } from "@/services/auth.service";
 import { toast} from "react-toastify";
 
@@ -13,27 +17,37 @@ export default function ResetPasswordForm() {
 
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [confirmPasswordError, setConfirmPasswordError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setPasswordError("");
+    setConfirmPasswordError("");
 
     if (password !== confirmPassword) {
-      alert("Passwords do not match");
+      setConfirmPasswordError("Passwords do not match");
       return;
     }
 
     try {
+      setLoading(true);
       const response = await authService.resetPassword({
         password,
         confirmPassword,
       });
 
-      console.log(response);
 localStorage.removeItem("resetToken");
       router.push("/login");
-      toast.success("Password reset successfully. Please login.");
+      toast.success(response.message || "Password reset successfully. Please login.");
     } catch (error) {
-      console.error(error);
+      const message = getApiErrorMessage(error, "Unable to reset password.");
+      setPasswordError(getApiFieldError(error, "password") || message);
+      setConfirmPasswordError(getApiFieldError(error, "confirmPassword") || "");
+      toast.error(message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -56,6 +70,7 @@ localStorage.removeItem("resetToken");
         type="password"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
+        error={passwordError}
         required
       />
 
@@ -65,12 +80,14 @@ localStorage.removeItem("resetToken");
         type="password"
         value={confirmPassword}
         onChange={(e) => setConfirmPassword(e.target.value)}
+        error={confirmPasswordError}
         required
       />
 
       <Button
         type="submit"
         className="w-full"
+        loading={loading}
       >
         Reset Password
       </Button>

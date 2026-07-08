@@ -5,29 +5,42 @@ import { useRouter } from "next/navigation";
 
 import Input from "@/components/common/Input";
 import Button from "@/components/common/Button";
+import {
+  getApiErrorMessage,
+  getApiFieldError,
+} from "@/lib/api-response";
 import { authService } from "@/services/auth.service";
+import { toast } from "react-toastify";
 
 export default function ForgotPasswordForm() {
   const router = useRouter();
 
   const [email, setEmail] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setEmailError("");
+
     try {
-         console.log(email);
+      setLoading(true);
   const response =
     await authService.forgotPassword({
       email,
     });
 
-  console.log(response);
+  toast.success(response.message || "OTP sent successfully.");
 
   router.push(
-    `/verify-forgot-password?email=${email}`
+    `/verify-forgot-password?email=${encodeURIComponent(email)}`
   );
 } catch (error) {
-  console.error(error);
+  const message = getApiErrorMessage(error, "Unable to send OTP.");
+  setEmailError(getApiFieldError(error, "email") || message);
+  toast.error(message);
+} finally {
+  setLoading(false);
 }
 
    
@@ -55,10 +68,11 @@ export default function ForgotPasswordForm() {
         onChange={(e) =>
           setEmail(e.target.value)
         }
+        error={emailError}
         required
       />
 
-      <Button type="submit" className="w-full">
+      <Button type="submit" className="w-full" loading={loading}>
         Send OTP
       </Button>
     </form>

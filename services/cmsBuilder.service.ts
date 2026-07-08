@@ -6,8 +6,10 @@ export const cmsBuilderService = {
     id: string,
     blocks: BuilderBlock[]
   ) => {
-    return api.put(`/cms-pages/${id}/builder`, {
+    const { data } = await api.put(`/cms-pages/${id}/builder`, {
       blocks,
     });
+
+    return data;
   },
 };

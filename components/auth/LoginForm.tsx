@@ -8,8 +8,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import Input from "@/components/common/Input";
 import PasswordInput from "@/components/common/PasswordInput";
 import Button from "@/components/common/Button";
+import {
+  applyApiValidationErrors,
+  getApiErrorMessage,
+} from "@/lib/api-response";
 import {toLoginPayload} from "@/lib/mappers/auth.mapper";
 import { authService } from "@/services/auth.service";
+import { toast } from "react-toastify";
 
 
 import {
@@ -23,6 +28,7 @@ export default function LoginForm() {
   const {
     register,
     handleSubmit,
+    setError,
     formState: { errors, isSubmitting },
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -33,6 +39,7 @@ export default function LoginForm() {
   });
 
   const onSubmit = async (data: LoginFormData) => {
+    try {
     const payload = toLoginPayload(data);
 
 const response = await authService.login(payload);
@@ -44,12 +51,13 @@ localStorage.setItem(
   "user",
   JSON.stringify(response.data.user)
 );
-console.log(response);
-    console.log(data);
-    alert("Login successful!"); // TODO: Replace with success notification
+    toast.success(response.message || "Login successful.");
 
-    // TODO: Replace with API
     router.push("/dashboard");
+    } catch (error) {
+      applyApiValidationErrors(error, setError);
+      toast.error(getApiErrorMessage(error, "Login failed. Please try again."));
+    }
   };
 
   return (
@@ -106,7 +114,7 @@ console.log(response);
         </Button>
 
         <p className="text-center text-sm text-slate-600">
-          Don't have an account?{" "}
+          Don&apos;t have an account?{" "}
           <Link
             href="/signup"
             className="font-semibold text-blue-600 hover:text-blue-700"

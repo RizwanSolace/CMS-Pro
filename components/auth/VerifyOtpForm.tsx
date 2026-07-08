@@ -2,15 +2,20 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Suspense } from 'react';
 import {
   OTPInput,
   REGEXP_ONLY_DIGITS
 } from "input-otp";
 import Button from "@/components/common/Button";
+import {
+  getApiErrorMessage,
+  getApiFieldError,
+  getApiSuccessMessage,
+} from "@/lib/api-response";
 import { useSearchParams } from "next/navigation";
 import { authService} from "@/services/auth.service"
 import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
 
 
 export default function VerifyOtpForm() {
@@ -18,28 +23,71 @@ const searchParams = useSearchParams();
 
 const email = searchParams.get("email");
   const [otp, setOtp] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [resending, setResending] = useState(false);
   const router=useRouter();
 
   const handleVerify = async () => {
-   //await authService.verifyEmail(email!, otp);
- if (otp.length !== 6) return;
- if (!email) return;
+ setErrorMessage("");
+ setSuccessMessage("");
+ if (otp.length !== 6) {
+  setErrorMessage("Please enter the 6-digit OTP.");
+  return;
+ }
+ if (!email) {
+  setErrorMessage("Email address is missing. Please register again.");
+  return;
+ }
 
-  console.log(otp);
    try {
+    setLoading(true);
     const response = await authService.verifyEmail({
       email,
       otp,
     });
-    console.log(response)
+    toast.success(response.message || "Email verified successfully.");
 
   router.push("/login");
-    // TODO:
    }
    catch (error) {
-      console.error("OTP verification failed:", error);
+      const message = getApiErrorMessage(error, "OTP verification failed.");
+      setErrorMessage(
+        getApiFieldError(error, "otp") ||
+          getApiFieldError(error, "email") ||
+          message
+      );
+      toast.error(message);
+    } finally {
+      setLoading(false);
     }
-  }  // verify OTP API
+  };
+
+  const handleResendOtp = async () => {
+    setErrorMessage("");
+    setSuccessMessage("");
+
+    if (!email) {
+      setErrorMessage("Email address is missing. Please register again.");
+      return;
+    }
+
+    try {
+      setResending(true);
+      const response = await authService.resendOtp(email);
+      const message = getApiSuccessMessage(response, "OTP sent successfully.");
+
+      setSuccessMessage(message);
+      toast.success(message);
+    } catch (error) {
+      const message = getApiErrorMessage(error, "Unable to resend OTP.");
+      setErrorMessage(getApiFieldError(error, "email") || message);
+      toast.error(message);
+    } finally {
+      setResending(false);
+    }
+  };
   
 
   return (
@@ -53,7 +101,7 @@ const email = searchParams.get("email");
           Enter the 6-digit verification code sent to your email.
         </p>
         <p className="mt-2 text-sm text-gray-500">
-  We've sent a verification code to
+  We&apos;ve sent a verification code to
 </p>
 
 <p className="font-semibold text-slate-700">
@@ -85,22 +133,36 @@ const email = searchParams.get("email");
           </>
         )}
       />
+      {errorMessage && (
+        <p className="mt-3 text-sm text-red-500">
+          {errorMessage}
+        </p>
+      )}
+      {successMessage && (
+        <p className="mt-3 text-sm text-green-600">
+          {successMessage}
+        </p>
+      )}
 
       <div className="mt-8">
         <Button
           fullWidth
           onClick={handleVerify}
+          loading={loading}
         >
           Verify Email
         </Button>
       </div>
 
       <div className="mt-6 text-center text-sm">
-        Didn't receive the code?{" "}
+        Didn&apos;t receive the code?{" "}
         <button
+          type="button"
+          onClick={handleResendOtp}
+          disabled={resending}
           className="font-semibold text-blue-600 hover:underline"
         >
-          Resend OTP
+          {resending ? "Sending..." : "Resend OTP"}
         </button>
       </div>
 
