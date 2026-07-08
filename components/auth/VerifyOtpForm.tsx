@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-
+import { Suspense } from 'react';
 import {
   OTPInput,
   REGEXP_ONLY_DIGITS
