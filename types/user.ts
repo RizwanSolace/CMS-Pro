@@ -16,3 +16,13 @@ export interface User {
   status: UserStatus;
   createdAt: string;
 }
+export interface ChangePasswordPayload {
+  currentPassword: string;
+  password: string;
+  confirmPassword: string;
+}
+
+export interface ChangePasswordResponse {
+  success: boolean;
+  message: string;
+}

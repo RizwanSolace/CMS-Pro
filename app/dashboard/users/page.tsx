@@ -1,4 +1,5 @@
 "use client";
+import RoleGuard from "@/components/auth/RoleGuard";
 import { Plus } from "lucide-react";
 import UserFilters from "@/components/users/UserFilters";
 import Button from "@/components/common/Button";
@@ -38,6 +39,7 @@ const [status, setStatus] = useState("All Status");
 }, [search, role, status]);
 
   return (
+    <RoleGuard allowedRoles={["SUPER_ADMIN", "ADMIN"]}>
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
@@ -71,5 +73,6 @@ const [status, setStatus] = useState("All Status");
 <UserTable users={filteredUsers}/>
       {/* Table */}
     </div>
+    </RoleGuard>
   );
 }

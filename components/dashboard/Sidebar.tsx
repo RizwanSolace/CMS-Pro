@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import clsx from "clsx";
 import { useRouter } from "next/navigation";
+import useAuth from "@/hooks/useAuth";
 
 
 
@@ -21,37 +22,49 @@ const menus = [
     title: "Dashboard",
     href: "/dashboard",
     icon: LayoutDashboard,
+    roles: ["SUPER_ADMIN", "ADMIN", "EDITOR"],
   },
   {
     title: "Users",
     href: "/dashboard/users",
     icon: Users,
+    roles: ["SUPER_ADMIN", "ADMIN"],
   },
   {
     title: "CMS Pages",
     href: "/dashboard/cms-pages",
     icon: FileText,
+    roles: ["SUPER_ADMIN", "ADMIN", "EDITOR"],
   },
   {
     title: "Roles",
     href: "/dashboard/roles",
     icon: Shield,
+    roles: ["SUPER_ADMIN"],
   },
   {
     title: "Settings",
     href: "/dashboard/settings",
     icon: Settings,
+    roles: ["SUPER_ADMIN"],
   },
   {
     title: "Profile",
     href: "/dashboard/profile",
     icon: User,
+    roles: ["SUPER_ADMIN", "ADMIN", "EDITOR"],
   },
 ];
 
 export default function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
+  const { role } = useAuth();
+
+  const visibleMenus = menus.filter((m) => {
+    if (!m.roles) return true;
+    return role ? m.roles.includes(role) : false;
+  });
 
 const handleLogout = () => {
   localStorage.removeItem("accessToken");
@@ -73,7 +86,7 @@ const handleLogout = () => {
       </div>
 
       <nav className="flex-1 space-y-2 p-4">
-        {menus.map((menu) => {
+        {visibleMenus.map((menu) => {
           const Icon = menu.icon;
 
           return (

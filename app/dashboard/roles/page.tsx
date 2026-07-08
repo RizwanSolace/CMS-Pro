@@ -1,4 +1,5 @@
 "use client"
+import RoleGuard from "@/components/auth/RoleGuard";
 import { mockRoles } from "@/components/roles/mockroles";
 import RolesTable from "@/components/roles/RolesTable";
 import Button from "@/components/common/Button";
@@ -8,6 +9,7 @@ import { useState } from "react";
 export default function RolesPage() {
     const [openAdd, setOpenAdd] = useState(false);
   return (
+    <RoleGuard allowedRoles={["SUPER_ADMIN"]}>
     <div className="space-y-8">
       <div className="flex items-start justify-between">
         <div>
@@ -33,5 +35,6 @@ export default function RolesPage() {
   onClose={() => setOpenAdd(false)}
 />
     </div>
+    </RoleGuard>
   );
 }

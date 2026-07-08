@@ -61,6 +61,7 @@ export default function UserTable({ users }: UserTableProps) {
 
               <td>
                 <UserActionMenu
+                  targetUserRole={user.role}
                   onView={() => {
                     setSelectedUser(user);
                     setOpenView(true);
