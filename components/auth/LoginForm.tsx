@@ -46,6 +46,7 @@ localStorage.setItem(
 );
 console.log(response);
     console.log(data);
+    alert("Login successful!"); // TODO: Replace with success notification
 
     // TODO: Replace with API
     router.push("/dashboard");

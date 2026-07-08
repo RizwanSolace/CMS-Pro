@@ -10,6 +10,7 @@ import {
 } from "input-otp";
 
 import { authService } from "@/services/auth.service";
+import { toast} from "react-toastify";
 
 export default function VerifyForgotPasswordForm() {
   const searchParams = useSearchParams();
@@ -53,7 +54,10 @@ const handleResendOtp = async () => {
   response.data.resetToken
 );
       console.log("Verify OTP Response:", response);
-
+toast("OTP verified successfully. Redirecting to reset password page.", {
+  type: "success",
+  autoClose: 3000, // Close after 3 seconds
+});
 
       router.push(
         `/reset-password?email=${email}`

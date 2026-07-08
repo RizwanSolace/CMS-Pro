@@ -20,13 +20,71 @@ import { BuilderBlock } from "@/types/builder";
 import BuilderProperties from "@/components/cms-builder/BuilderProperties";
 import { useParams } from "next/navigation";
 import Button from "@/components/common/Button";
+
 export default function BuilderPage() {
+    
     const [blocks, setBlocks] = useState<BuilderBlock[]>([]);
 const params = useParams();
 
 const pageId = params.id;
     const [selectedBlock, setSelectedBlock] =
         useState<BuilderBlock | null>(null);
+        const deleteBlock = (id: string) => {
+  setBlocks((prev) => prev.filter((block) => block.id !== id));
+
+  if (selectedBlock?.id === id) {
+    setSelectedBlock(null);
+  }
+};
+
+const duplicateBlock = (id: string) => {
+  setBlocks((prev) => {
+    const index = prev.findIndex((b) => b.id === id);
+
+    if (index === -1) return prev;
+
+    const copy = {
+      ...prev[index],
+      id: crypto.randomUUID(),
+    };
+
+    const updated = [...prev];
+    updated.splice(index + 1, 0, copy);
+
+    return updated;
+  });
+};
+
+const moveBlock = (
+  id: string,
+  direction: "up" | "down"
+) => {
+  setBlocks((prev) => {
+    const index = prev.findIndex((b) => b.id === id);
+
+    if (index === -1) return prev;
+
+    const newIndex =
+      direction === "up"
+        ? index - 1
+        : index + 1;
+
+    if (
+      newIndex < 0 ||
+      newIndex >= prev.length
+    )
+      return prev;
+
+    const updated = [...prev];
+
+    [updated[index], updated[newIndex]] = [
+      updated[newIndex],
+      updated[index],
+    ];
+
+    return updated;
+  });
+};
 
     const handleDragEnd = (
         event: DragEndEvent
@@ -132,6 +190,9 @@ const pageId = params.id;
                 </SortableContext>
                 <BuilderProperties
                     block={selectedBlock}
+                    onDelete={deleteBlock}
+    onDuplicate={duplicateBlock}
+    onMove={moveBlock}
                     onChange={(updatedBlock) => {
                         setBlocks((prev) =>
                             prev.map((block) =>

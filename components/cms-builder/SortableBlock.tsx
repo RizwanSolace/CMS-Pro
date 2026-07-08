@@ -41,12 +41,17 @@ export default function SortableBlock({
       onClick={onClick}
       {...attributes}
       {...listeners}
-      className={`rounded-xl bg-white p-5 shadow cursor-pointer border-2 ${
+     className={`group relative rounded-xl bg-white p-5 shadow transition-all cursor-pointer border-2 ${
         selected
           ? "border-blue-600"
           : "border-transparent"
       }`}
     >
+      {selected && (
+  <div className="absolute right-3 top-3 rounded-full bg-blue-600 px-2 py-1 text-xs font-medium text-white">
+    Selected
+  </div>
+)}
       {block.type === "heading" && (
         <h1
           style={{

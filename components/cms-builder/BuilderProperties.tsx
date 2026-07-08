@@ -2,10 +2,22 @@
 
 import { BuilderBlock } from "@/types/builder";
 import { useState} from 'react'
+import {
+    Copy,
+    Trash2,
+    ArrowUp,
+    ArrowDown,
+} from "lucide-react";
 
 interface Props {
   block: BuilderBlock | null;
   onChange: (block: BuilderBlock) => void;
+   onDelete: (id: string) => void;
+  onDuplicate: (id: string) => void;
+  onMove: (
+    id: string,
+    direction: "up" | "down"
+  ) => void;
 }
 const handleSave = async () => {
   try {
@@ -23,6 +35,9 @@ const handleSave = async () => {
 export default function BuilderProperties({
   block,
   onChange,
+  onDelete,
+  onDuplicate,
+  onMove,
 }: Props)
 
 { 
@@ -47,7 +62,41 @@ useState(false);
       <h2 className="mb-6 text-xl font-semibold">
         Properties
       </h2>
+<div className="mb-6 space-y-3">
 
+  <button
+    onClick={() => onDuplicate(block.id)}
+    className="w-full rounded-lg border px-4 py-2 text-left hover:bg-slate-50"
+  >
+    <Copy size={18}/>
+     Duplicate Block
+  </button>
+
+  <button
+    onClick={() => onMove(block.id, "up")}
+    className="w-full rounded-lg border px-4 py-2 text-left hover:bg-slate-50"
+  >
+    <ArrowUp size={18}/>
+     Move Up
+  </button>
+
+  <button
+    onClick={() => onMove(block.id, "down")}
+    className="w-full rounded-lg border px-4 py-2 text-left hover:bg-slate-50"
+  >
+    <ArrowDown size={18}/>
+     Move Down
+  </button>
+
+  <button
+    onClick={() => onDelete(block.id)}
+    className="w-full rounded-lg bg-red-600 px-4 py-2 text-white hover:bg-red-700"
+  >
+ <Trash2 size={18} />
+     Delete Block
+  </button>
+
+</div>
       {/* Block Type */}
 
       <div className="mb-5">
