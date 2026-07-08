@@ -6,7 +6,7 @@ interface TableProps {
 
 export default function Table({ children }: TableProps) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-visible">
+    <div className="overflow-visible rounded-2xl border border-slate-200 bg-white text-slate-700 shadow-sm">
         <table className="min-w-full">
           {children}
         </table>
