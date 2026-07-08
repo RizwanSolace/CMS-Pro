@@ -1,7 +1,7 @@
 import api from "@/lib/axios";
 import { SignupPayLoad,SignupResponse,  VerifyEmailPayload,
-  VerifyEmailResponse, LoginPayload, LoginResponse,ForgotPasswordPayload,ForgotPasswordResponse,VerifyForgotPasswordOtpPayload,VerifyForgotPasswordOtpResponse,ResetPasswordPayload,ResetPasswordResponse} from "@/types/auth";
-
+  VerifyEmailResponse, LoginPayload, LoginResponse,ForgotPasswordPayload,ForgotPasswordResponse,VerifyForgotPasswordOtpPayload,VerifyForgotPasswordOtpResponse,ResetPasswordPayload,ResetPasswordResponse,  } from "@/types/auth";
+import { UserProfileResponse, UserProfile, UpdateProfilePayload,UpdateProfileResponse} from "@/types/auth";
 export const authService = {
  
   register: async (
@@ -34,12 +34,18 @@ export const authService = {
 login: async (
   payload: LoginPayload
 ): Promise<LoginResponse> => {
+  try{
     const { data } = await api.post<LoginResponse>(
       "/auth/login",
       payload
     );
 
     return data;
+  }catch(error:any){
+    console.log(error)
+    console.log(error.response)
+     throw error; // <-- Important
+  }
 },
 forgotPassword: async (
   payload: ForgotPasswordPayload
@@ -89,4 +95,22 @@ resendVerificationOtp: async (
 
   return data;
 },
+getProfile: async (): Promise<UserProfileResponse> => {
+  const { data } = await api.get<UserProfileResponse>(
+    "/user/profile"
+  );
+
+  return data;
+},
+updateProfile: async (
+    payload: UpdateProfilePayload
+  ): Promise<UpdateProfileResponse> => {
+    const { data } = await api.patch(
+      "/user/profile",
+      payload
+    );
+
+    return data;
+  },
 };
+  

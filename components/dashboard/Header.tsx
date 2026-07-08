@@ -1,8 +1,10 @@
 "use client";
 
 import { Bell, Search, ChevronDown } from "lucide-react";
+import { useProfile } from "@/hooks/useProfile";
 
 export default function Header() {
+  const { profile, loading } = useProfile();
   return (
     <header className="flex h-20 items-center justify-between border-b border-slate-200 bg-white px-8">
       {/* Left */}
@@ -42,16 +44,16 @@ export default function Header() {
         {/* User */}
         <button className="flex items-center gap-3 rounded-xl px-2 py-2 transition hover:bg-slate-100">
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-600 text-sm font-semibold text-white">
-            R
+          {profile?.name?.charAt(0).toUpperCase() ?? "U"}
           </div>
 
           <div className="hidden text-left lg:block">
             <h4 className="text-sm font-semibold text-slate-900">
-              Rizwan
+             {loading ? "Loading..." : profile?.name}
             </h4>
 
             <p className="text-xs text-slate-500">
-              Super Admin
+             {loading ? "" : profile?.role}
             </p>
           </div>
 

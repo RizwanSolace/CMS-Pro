@@ -1,3 +1,5 @@
+import { isAborted } from "zod/v3";
+
 export interface SignupPayLoad {
   name: string;
   
@@ -74,4 +76,32 @@ export interface ResetPasswordPayload {
 export interface ResetPasswordResponse {
   success: boolean;
   message: string;
+}
+export interface UserProfile {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  profilePicture: string | null;
+  role: string;
+  isVerified: boolean;
+  isActive:boolean;
+  lastLogin:string;
+  createdAt:string;
+}
+
+export interface UserProfileResponse {
+  success: boolean;
+  message: string;
+  data: UserProfile;
+}
+export interface UpdateProfilePayload {
+  name: string;
+  phone: string;
+}
+
+export interface UpdateProfileResponse {
+  success: boolean;
+  message: string;
+  data: UserProfile;
 }
