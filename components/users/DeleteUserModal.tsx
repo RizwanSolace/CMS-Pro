@@ -36,7 +36,7 @@ export default function DeleteUserModal({
         </div>
 
         <h3 className="mt-5 text-xl font-semibold">
-          Delete "{user.firstName} {user.lastName}"?
+          Delete "{user.name}"?
         </h3>
 
         <p className="mt-3 text-slate-500">

@@ -11,13 +11,18 @@ import { useMemo, useState } from "react";
 
 
 export default function UsersPage() {
+
+
   const [search, setSearch] = useState("");
 const [role, setRole] = useState("All Roles");
 const [status, setStatus] = useState("All Status");
-    const { users } = useUsers();
+   const { users, loading, error, fetchUsers } = useUsers();
+
     const filteredUsers = useMemo(() => {
-  return mockUsers.filter((user) => {
-    const fullName = `${user.firstName} ${user.lastName}`.toLowerCase();
+        console.log("Selected role:", role);
+  return users.filter((user) => {
+   const fullName = (user.name ?? "").toLowerCase();
+    console.log("Comparing:", user.role, role);
 
   const matchesSearch =
       fullName.includes(search.toLowerCase()) ||
@@ -25,10 +30,12 @@ const [status, setStatus] = useState("All Status");
       user.phone.includes(search);
 
     const matchesRole =
-      role === "All Roles" || user.role === role;
+      role === "All Roles" || user.role == role;
 
-    const matchesStatus =
-      status === "All Status" || user.status === status;
+   const matchesStatus =
+  status === "All Status" ||
+  (status === "ACTIVE" && user.isActive) ||
+  (status === "INACTIVE" && !user.isActive);
 
     return (
       matchesSearch &&
@@ -36,11 +43,30 @@ const [status, setStatus] = useState("All Status");
       matchesStatus
     );
   });
-}, [search, role, status]);
+}, [users,search, role, status]);
+if (loading) {
+  return (
+    <div className="flex justify-center py-20">
+      Loading users...
+    </div>
+  );
+}
+
+if (error) {
+  return (
+    <div className="flex justify-center py-20 text-red-500">
+      Failed to load users.
+    </div>
+  );
+}
 
   return (
+   
+
     <RoleGuard allowedRoles={["SUPER_ADMIN", "ADMIN"]}>
+
     <div className="space-y-8">
+   
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-slate-900">
@@ -70,7 +96,8 @@ const [status, setStatus] = useState("All Status");
  
 />
       {/* Filters */}
-<UserTable users={filteredUsers}/>
+<UserTable users={filteredUsers}     onRefresh={fetchUsers}
+/>
       {/* Table */}
     </div>
     </RoleGuard>

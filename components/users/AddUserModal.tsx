@@ -23,6 +23,9 @@ export default function AddUserModal() {
       >
         <UserForm
           onCancel={() => setOpen(false)}
+          onRefresh={() => {
+            setOpen(false);
+          }}
         />
       </Modal>
     </>

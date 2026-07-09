@@ -26,14 +26,11 @@ export default function ViewUserModal({
     >
       <div className="grid grid-cols-2 gap-6">
         <Info
-          label="First Name"
-          value={user.firstName}
+          label="Name"
+          value={user.name}
         />
 
-        <Info
-          label="Last Name"
-          value={user.lastName}
-        />
+       
 
         <Info
           label="Email"

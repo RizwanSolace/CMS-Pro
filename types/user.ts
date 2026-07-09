@@ -7,14 +7,30 @@ export type UserRole =
   | "User";
 
 export interface User {
-  id: number;
-  firstName: string;
-  lastName: string;
+  _id: string;
+  id: string;
+  name: string;
   email: string;
   phone: string;
+
   role: UserRole;
+  isActive: boolean;
+  isVerified: boolean;
   status: UserStatus;
   createdAt: string;
+}
+export interface GetUsersResponse {
+  success: boolean;
+  message: string;
+  data: {
+    users: User[];
+    pagination: {
+      total: number;
+      page: number;
+      limit: number;
+      totalPages: number;
+    };
+  };
 }
 export interface ChangePasswordPayload {
   currentPassword: string;
@@ -25,4 +41,11 @@ export interface ChangePasswordPayload {
 export interface ChangePasswordResponse {
   success: boolean;
   message: string;
+}
+export interface UpdateUserPayload {
+  name: string;
+  email: string;
+  phone: string;
+  role: string;
+  isActive: boolean;
 }

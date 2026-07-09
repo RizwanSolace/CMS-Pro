@@ -9,13 +9,17 @@ import EditUserModal from "./EditUserModal";
 import DeleteUserModal from "./DeleteUserModal";
 
 import { User } from "@/types/user";
+//import useUsers from "@/hooks/useUsers";
 interface UserTableProps {
   users: User[];
+   onRefresh: () => void;
+
 }
 
-export default function UserTable({ users }: UserTableProps) {
+export default function UserTable({ users, onRefresh, }: UserTableProps) {
   const [selectedUser, setSelectedUser] =
     useState<User | null>(null);
+    
   const [openView, setOpenView] = useState(false);
   const [openEdit, setOpenEdit] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
@@ -42,7 +46,7 @@ export default function UserTable({ users }: UserTableProps) {
               className="hover:bg-slate-50"
             >
               <td className="px-6 py-4 font-medium">
-                {user.firstName} {user.lastName}
+                {user.name}
               </td>
 
               <td>{user.email}</td>
@@ -50,10 +54,11 @@ export default function UserTable({ users }: UserTableProps) {
               <td>{user.phone}</td>
 
               <td>{user.role}</td>
-
+              {/* if(user.status === "Active" || user.status === "Inactive" || user.status === "Blocked") { */}
+               
               <td>
                 <UserStatusBadge
-                  status={user.status}
+                  status={user.isActive ? "Active" : "Inactive"}
                 />
               </td>
 
@@ -90,6 +95,7 @@ export default function UserTable({ users }: UserTableProps) {
         open={openEdit}
         user={selectedUser}
         onClose={() => setOpenEdit(false)}
+         onRefresh={onRefresh}
       />
       <DeleteUserModal
         open={openDelete}
