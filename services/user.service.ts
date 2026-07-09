@@ -44,7 +44,7 @@ updateUser: async (
   payload: UpdateUserPayload
 ) => {
   const { data } = await api.patch(
-    `/users/${id}`,
+    `/manageUser/${id}`,
     payload
   );
     console.log("PATCH Response:", data);
