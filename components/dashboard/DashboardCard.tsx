@@ -1,3 +1,5 @@
+
+import useDashboard from "@/hooks/useDashboard";
 import { LucideIcon } from "lucide-react";
 
 interface DashboardCardProps {
@@ -13,6 +15,7 @@ export default function DashboardCard({
   icon: Icon,
   color,
 }: DashboardCardProps) {
+  
   return (
     <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg">
       <div className="flex items-center justify-between">

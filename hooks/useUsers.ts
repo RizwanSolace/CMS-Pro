@@ -22,10 +22,14 @@ const fetchUsers = async () => {
       limit: 10,
     });
 
-    setUsers( res.data.users.map((user: any) => ({
-    ...user,
-    id: user._id
-  })));
+    const mappedUsers = res.data.users.map((user: any) => ({
+  ...user,
+  id: user._id,
+}));
+
+console.log("Mapped users:", mappedUsers);
+
+setUsers(mappedUsers);
      console.log("Latest users from API:", res.data.users)
   } catch (err) {
     setError(err as Error);

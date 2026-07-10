@@ -1,3 +1,4 @@
+"use client";
 import {
   ArrowRight,
   CheckCircle2,
@@ -15,8 +16,18 @@ import Link from "next/link";
 import DashboardCard from "@/components/dashboard/DashboardCard";
 import { mockCmsPages } from "@/data/mockCmsPages";
 import { mockUsers } from "@/data/mockUsers";
+import useDashboard from "@/hooks/useDashboard";
 
 export default function DashboardPage() {
+  const { stats, loading } = useDashboard();
+  if (loading) {
+  return (
+    <div className="flex justify-center py-20">
+      Loading Dashboard...
+    </div>
+  );  
+
+   }
   const activeUsers = mockUsers.filter(
     (user) => user.status === "Active"
   ).length;
@@ -26,7 +37,7 @@ export default function DashboardPage() {
   const draftPages = mockCmsPages.filter(
     (page) => page.status === "Draft"
   ).length;
-
+   
   return (
     <div className="space-y-8">
       <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
@@ -50,15 +61,15 @@ export default function DashboardPage() {
           <div className="grid gap-3 sm:grid-cols-3">
             <FocusPill
               label="Active users"
-              value={activeUsers}
+              value={stats?.activeUsers ?? 0}
             />
             <FocusPill
               label="Published"
-              value={publishedPages}
+              value={stats?.publishedPages ?? 0}
             />
             <FocusPill
               label="Drafts"
-              value={draftPages}
+              value={stats?.draftPages ?? 0}
             />
           </div>
         </div>
@@ -67,28 +78,28 @@ export default function DashboardPage() {
       <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
         <DashboardCard
           title="Total Users"
-          value={mockUsers.length}
+          value={stats?.totalUsers ?? 0}
           icon={Users}
           color="bg-blue-600"
         />
 
         <DashboardCard
           title="CMS Pages"
-          value={mockCmsPages.length}
+          value={stats?.totalCmsPages ?? 0}
           icon={FileText}
           color="bg-green-600"
         />
 
         <DashboardCard
           title="Roles"
-          value={4}
+          value={stats?.totalRoles ?? 0}
           icon={Shield}
           color="bg-orange-500"
         />
 
         <DashboardCard
           title="New Signups"
-          value={mockUsers.slice(-2).length}
+          value={stats?.newSignups ?? 0}
           icon={UserPlus}
           color="bg-purple-600"
         />
@@ -175,19 +186,19 @@ export default function DashboardPage() {
         <Insight
           icon={CheckCircle2}
           title="Content Health"
-          value={`${publishedPages}/${mockCmsPages.length}`}
+          value={stats?.publishedPages ?? 0}
           detail="pages are published"
         />
         <Insight
           icon={Clock3}
           title="Pending Drafts"
-          value={draftPages}
+          value={stats?.draftPages ?? 0}
           detail="pages waiting for review"
         />
         <Insight
           icon={Users}
           title="User Activity"
-          value={activeUsers}
+          value={stats?.activeUsers ?? 0}
           detail="accounts currently active"
         />
       </section>

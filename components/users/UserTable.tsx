@@ -23,7 +23,7 @@ export default function UserTable({ users, onRefresh, }: UserTableProps) {
   const [openView, setOpenView] = useState(false);
   const [openEdit, setOpenEdit] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
-
+console.log("Users in table:", users);
   return (
     <>
       <Table>
@@ -98,13 +98,15 @@ export default function UserTable({ users, onRefresh, }: UserTableProps) {
          onRefresh={onRefresh}
       />
       <DeleteUserModal
+      
         open={openDelete}
         user={selectedUser}
         onClose={() => setOpenDelete(false)}
-        onConfirm={() => {
-          console.log("Delete", selectedUser);
-          setOpenDelete(false);
-        }}
+         onConfirm={async () => {
+           console.log("Selected user before modal:", users);
+        await onRefresh();
+        setOpenDelete(false);
+    }}
       />
     </>
   );

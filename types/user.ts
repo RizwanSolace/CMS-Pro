@@ -49,3 +49,18 @@ export interface UpdateUserPayload {
   role: string;
   isActive: boolean;
 }
+export interface CreateEditorPayload {
+  name: string;
+  email: string;
+  phone: string;
+  password: string;
+  confirmPassword: string;
+}
+export interface CreateAdminPayload {
+  name: string;
+  email: string;
+  phone: string;
+  password: string;
+  confirmPassword: string;
+
+}

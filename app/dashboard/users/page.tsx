@@ -78,7 +78,7 @@ if (error) {
           </p>
         </div>
 
-       <AddUserModal />
+       <AddUserModal  />
        
       </div>
 <UserFilters 

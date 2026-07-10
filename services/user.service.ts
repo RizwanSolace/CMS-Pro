@@ -1,8 +1,10 @@
 import {
   ChangePasswordPayload,
   ChangePasswordResponse,
+  CreateEditorPayload,
   GetUsersResponse,
   UpdateUserPayload,
+  CreateAdminPayload,
 } from "@/types/user";
 import api from "@/lib/axios";
 export const userService = {
@@ -51,6 +53,30 @@ updateUser: async (
 
   
 
+  return data;
+},
+deleteUser: async (id: string) => {
+    console.log("Deleting user id:", id);
+
+  const { data } = await api.delete(`/manageUser/${id}`);
+  return data;
+},
+createEditor: async (payload: CreateEditorPayload) => {
+  try{
+  const { data } = await api.post(
+    "/manageUser/editor",
+    payload
+  );
+
+  return data;
+}catch (error) {
+    console.error("Error creating editor:", error);
+    console.log("Error Response", (error as any).response);
+    throw error;
+  }
+},
+createAdmin: async (payload: CreateAdminPayload) => {
+  const { data } = await api.post("/manageUser/admin", payload);
   return data;
 },
 }

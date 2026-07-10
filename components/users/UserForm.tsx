@@ -33,30 +33,62 @@ export default function UserForm({
   role: user?.role ?? "USER",
   isActive: user?.isActive ?? true,
   status: user?.status ?? "ACTIVE",
+    password: "",
+  confirmPassword: "",
 });
-const handleSubmit = async (
-    e: React.FormEvent
-) => {
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
 
-    e.preventDefault();
-  if(!user){
-    return;
-  }
+  try {
+    if (isEdit) {
+      if (!user) return;
 
-    try {
-        await userService.updateUser(
-            user.id,
-            formData
-        );
-        console.log("Updating:", formData);
-console.log("User Id:", user?._id);
-await onRefresh();
-        alert("User updated successfully");
-//onSuccess?.();  
-        onCancel();
-    } catch (err) {
-        console.error(err);
+      await userService.updateUser(user.id, {
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        role: formData.role,
+        isActive: formData.isActive,
+      });
+
+      alert("User updated successfully");
+    } else {
+      const payload = {
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        password: formData.password,
+        confirmPassword: formData.confirmPassword,
+      };
+       console.log(formData);
+       console.log("Submitting:", {
+  name: formData.name,
+  email: formData.email,
+  phone: formData.phone,
+  role: formData.role,
+});
+      switch (formData.role) {
+        case "ADMIN":
+          await userService.createAdmin(payload);
+          alert("Admin created successfully");
+          break;
+
+        case "EDITOR":
+          await userService.createEditor(payload);
+          alert("Editor created successfully");
+          break;
+
+       
+        
+      }
+        alert("User created successfully");
     }
+
+    await onRefresh();
+    onCancel();
+  } catch (err) {
+    console.error(err);
+  }
 };
 
   return (
@@ -88,7 +120,8 @@ await onRefresh();
         type="email"
         label="Email Address"
         placeholder="john@example.com"
-        defaultValue={user?.email??""}
+       value={formData.email}
+
          
   onChange={(e) =>
     setFormData({
@@ -164,6 +197,13 @@ onChange={(e) =>
             label="Password"
             placeholder="Enter password"
             required
+            value={formData.password}
+  onChange={(e) =>
+    setFormData({
+      ...formData,
+      password: e.target.value,
+    })
+  }
           />
 
           <PasswordInput
@@ -171,6 +211,13 @@ onChange={(e) =>
             label="Confirm Password"
             placeholder="Confirm password"
             required
+            value={formData.confirmPassword}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                confirmPassword: e.target.value,
+              })
+            }
           />
         </>
       )}

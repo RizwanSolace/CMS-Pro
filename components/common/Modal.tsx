@@ -51,10 +51,10 @@ export default function Modal({
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-5"
       onClick={onClose}
     >
-      <div
-        className={`w-full ${sizes[size]} rounded-2xl bg-white shadow-2xl`}
-        onClick={(e) => e.stopPropagation()}
-      >
+     <div
+  className={`w-full ${sizes[size]} max-h-[90vh] overflow-hidden rounded-2xl bg-white shadow-2xl`}
+  onClick={(e) => e.stopPropagation()}
+>
         {/* Header */}
 
         <div className="flex items-center justify-between border-b border-slate-200 px-6 py-5">
@@ -72,7 +72,9 @@ export default function Modal({
 
         {/* Body */}
 
-        <div className="p-6">
+        <div className="max-h-[calc(90vh-80px)] overflow-y-auto p-6">
+  
+
           {children}
         </div>
       </div>

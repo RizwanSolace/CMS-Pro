@@ -14,6 +14,7 @@ export default function AddUserModal() {
       <Button onClick={() => setOpen(true)}>
         Add User
       </Button>
+      <div className="w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-2xl bg-white">
 
       <Modal
         open={open}
@@ -28,6 +29,7 @@ export default function AddUserModal() {
           }}
         />
       </Modal>
+      </div>
     </>
   );
 }

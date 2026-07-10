@@ -1,6 +1,7 @@
 import { ReactNode } from "react";
 import Sidebar from "./Sidebar";
 import Header from "./Header";
+import useDashboard from "@/hooks/useDashboard";
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -9,6 +10,7 @@ interface DashboardLayoutProps {
 export default function DashboardLayout({
   children,
 }: DashboardLayoutProps) {
+  //const { stats, loading } = useDashboard();
   return (
     <div className="flex h-screen bg-slate-100">
       <Sidebar />

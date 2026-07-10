@@ -85,6 +85,15 @@ export function getUserFromLocalStorage() {
 
 function normalizeRole(role: string | undefined | null) {
   if (!role) return role;
+  const normalized = role
+    .trim()
+    .replace(/\s+/g, "_")
+    .toUpperCase();
+
+  if (normalized === "USER") {
+    return "EDITOR";
+  }
+
 
   return role.toString().trim().replace(/\s+/g, "_").toUpperCase();
 }
