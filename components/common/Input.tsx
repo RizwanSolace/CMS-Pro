@@ -33,6 +33,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
         <input
           ref={ref}
           id={id}
+          name={props.name ?? id}
           className={clsx(
             "w-full rounded-lg border px-4 py-2.5 text-sm transition-all duration-200",
             "focus:outline-none focus:ring-2",

@@ -13,6 +13,8 @@ import CmsStatusBadge from "./CmsStatusBadge";
 import { useState} from 'react'
 import CmsActionMenu from "./CmsActionMenu";
 import { useRouter } from "next/navigation";
+import useCmsPages from "@/hooks/useCms";
+import { cmsService } from "@/services/cms.service";
 
 
 interface CmsTableProps {
@@ -23,11 +25,25 @@ export default function CmsTable({
   pages,
 }: CmsTableProps)
   {const [selectedPage, setSelectedPage] = useState<CmsPage | null>(null);
- 
+ const {  pages: cmsPages } = useCmsPages();
  const [openView, setOpenView] = useState(false);
  const [openEdit, setOpenEdit] = useState(false);
  const [openDelete, setOpenDelete] = useState(false);
   const router = useRouter();
+  const handleView = async (id: string) => {
+    console.log("View ID:", id)
+  try {
+    const res = await cmsService.view(id);
+
+    console.log(res);
+
+    setSelectedPage(res.data);
+
+    setOpenView(true);
+  } catch (error) {
+    console.error(error);
+  }
+};
   return (
     <>
     <Table>
@@ -45,9 +61,9 @@ export default function CmsTable({
       </TableHead>
 
       <TableBody>
-        {pages.map((page) => (
+        {cmsPages.map((page:any) => (
           <tr
-            key={page.id}
+            key={page._id}
             className="hover:bg-slate-50"
           >
             <td className="px-6 py-4 font-medium">
@@ -62,15 +78,14 @@ export default function CmsTable({
               />
             </td>
 
-            <td>{page.author}</td>
+            <td>{page.createdBy.name}</td>
 
             <td>{page.updatedAt}</td>
 
             <td className="relative overflow-visible text-center">
              <CmsActionMenu
   onView={() => {
-    setSelectedPage(page);
-    setOpenView(true);
+    handleView(page._id);
   }}
   onEdit={() => {
     setSelectedPage(page);
@@ -80,10 +95,8 @@ export default function CmsTable({
     setSelectedPage(page);
     setOpenDelete(true);
   }}
-   onBuilder={() =>
-        router.push(
-            `/dashboard/cms-pages/builder/${page.id}`
-        )
+   onPreview={() =>
+        router.push(`/dashboard/cms-pages/preview/${page._id}`)
     }
 />
             </td>

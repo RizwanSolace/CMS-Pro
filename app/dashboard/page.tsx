@@ -14,11 +14,15 @@ import {
 import Link from "next/link";
 
 import DashboardCard from "@/components/dashboard/DashboardCard";
-import { mockCmsPages } from "@/data/mockCmsPages";
-import { mockUsers } from "@/data/mockUsers";
+//import { mockCmsPages } from "@/data/mockCmsPages";
+import useCmsPages from "@/hooks/useCms";
+//import { mockUsers } from "@/data/mockUsers";
 import useDashboard from "@/hooks/useDashboard";
 
 export default function DashboardPage() {
+  const pages=useCmsPages();
+  const CmsPages=pages.pages;
+  console.log(CmsPages);
   const { stats, loading } = useDashboard();
   if (loading) {
   return (
@@ -28,15 +32,15 @@ export default function DashboardPage() {
   );  
 
    }
-  const activeUsers = mockUsers.filter(
-    (user) => user.status === "Active"
-  ).length;
-  const publishedPages = mockCmsPages.filter(
-    (page) => page.status === "Published"
-  ).length;
-  const draftPages = mockCmsPages.filter(
-    (page) => page.status === "Draft"
-  ).length;
+  // const activeUsers = mockUsers.filter(
+  //   (user) => user.status === "Active"
+  // ).length;
+  // const publishedPages = mockCmsPages.filter(
+  //   (page) => page.status === "Published"
+  // ).length;
+  // const draftPages = mockCmsPages.filter(
+  //   (page) => page.status === "Draft"
+  // ).length;
    
   return (
     <div className="space-y-8">
@@ -127,7 +131,7 @@ export default function DashboardPage() {
           </div>
 
           <div className="divide-y divide-slate-200">
-            {mockCmsPages.map((page) => (
+            {CmsPages.map((page:any) => (
               <div
                 key={page.id}
                 className="flex items-center justify-between gap-4 py-4"

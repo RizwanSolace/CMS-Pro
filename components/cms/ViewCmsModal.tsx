@@ -40,33 +40,31 @@ export default function ViewCmsModal({
           <p>{page.description}</p>
         </div>
 
-        <div>
-          <p className="text-sm text-slate-500">Content</p>
-          <div className="rounded-lg border p-4 whitespace-pre-wrap">
-            {page.content}
-          </div>
-        </div>
 
         <div className="grid grid-cols-2 gap-5">
 
           <div>
             <p className="text-sm text-slate-500">SEO Title</p>
-            <p>{page.seoTitle}</p>
+            <p>{page.content?.hero?.title ?? "-"}</p>
           </div>
 
           <div>
-            <p className="text-sm text-slate-500">Status</p>
-            <p>{page.status}</p>
+            <p className="text-sm text-slate-500">SEO Subtitle</p>
+            <p>{page.content?.hero?.subtitle ?? "-"}</p>
           </div>
 
         </div>
 
         <div>
-          <p className="text-sm text-slate-500">
-            SEO Description
-          </p>
-          <p>{page.seoDescription}</p>
+          <p className="text-sm text-slate-500">Status</p>
+          <p>{page.status}</p>
         </div>
+        <div>
+          <p className="text-sm text-slate-500">Author</p>
+          <p>{page.createdBy.name}</p>
+        </div>
+
+
 
       </div>
     </Modal>

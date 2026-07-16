@@ -2,11 +2,26 @@
 
 import Modal from "@/components/common/Modal";
 import CmsForm from "./CmsForm";
+import { CmsPage } from "@/types/cms";
+import { cmsService } from "@/services/cms.service";
 
 interface EditCmsModalProps {
   open: boolean;
   onClose: () => void;
-  page: any;
+  page: CmsPage | null;
+}
+
+interface CmsFormData {
+  title: string;
+  slug: string;
+  description: string;
+  content: {
+    hero: {
+      title: string;
+      subtitle: string;
+    };
+  };
+  featuredImage: string;
 }
 
 export default function EditCmsModal({
@@ -16,6 +31,18 @@ export default function EditCmsModal({
 }: EditCmsModalProps) {
   if (!page) return null;
 
+  const handleSubmit = async (data: CmsFormData) => {
+    try {
+      await cmsService.update(page._id, data);
+
+      alert("Page updated successfully");
+
+      onClose();
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
     <Modal
       open={open}
@@ -24,14 +51,8 @@ export default function EditCmsModal({
     >
       <CmsForm
         mode="edit"
-        initialData={page}
-        onSubmit={(e) => {
-          e.preventDefault();
-
-          console.log("Update Page");
-
-          onClose();
-        }}
+        initialData={page} 
+        onSubmit={handleSubmit}
       />
     </Modal>
   );

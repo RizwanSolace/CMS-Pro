@@ -1,10 +1,13 @@
 "use client";
 
-import { mockCmsPages } from "@/data/mockCmsPages";
+import  useCmsPages  from "@/hooks/useCms";
 import CmsTable from "@/components/cms/CmsTable";
 import  AddCmsModal  from "@/components/cms/AddCmsModal"
 
 export default function CmsPages() {
+  const pages=useCmsPages();
+  const CmsPages=pages.pages;
+  console.log(CmsPages);
   return (
     <div className="space-y-8">
       <div>
@@ -17,7 +20,7 @@ export default function CmsPages() {
       </p>
       </div>
       <AddCmsModal />
-      <CmsTable pages={mockCmsPages} />
+      <CmsTable pages={CmsPages} />
     </div>
   );
 }

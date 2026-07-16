@@ -17,7 +17,7 @@ interface UserActionMenuProps {
   onView: () => void;
   onEdit: () => void;
   onDelete: () => void;
-   onBuilder: () => void;
+   onPreview: () => void;
   
 }
 interface Props {
@@ -25,10 +25,10 @@ interface Props {
   onView: () => void;
   onEdit: () => void;
   onDelete: () => void;
-  onBuilder: () => void;
+  onPreview: () => void;
 }
 
-export default function CmsActionMenu( { onView, onEdit, onDelete ,onBuilder,}: UserActionMenuProps) {
+export default function CmsActionMenu( { onView, onEdit, onDelete ,onPreview,}: UserActionMenuProps) {
   const [open, setOpen] = useState(false);
  
  
@@ -66,10 +66,11 @@ export default function CmsActionMenu( { onView, onEdit, onDelete ,onBuilder,}: 
       {open && (
       <div className="absolute right-0 top-full mt-2 z-[9999] w-44 rounded-xl border border-slate-200 bg-white py-2 shadow-xl">
         <button
-  onClick={onBuilder}
+  onClick={onPreview}
   className="w-full px-4 py-2 text-left hover:bg-slate-100"
 >
-    🛠 Open Builder
+    <Eye size={16} />
+    Preview
 </button>
           <button className="flex w-full items-center gap-3 px-4 py-2 hover:bg-slate-100" onClick={onView}>
             <Eye size={16} />
