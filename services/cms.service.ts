@@ -50,11 +50,40 @@ update: async (
     featuredImage: string;
   }
 ) => {
+   try {
+    const { data } = await api.post("/cmsPages/cms", payload);
+    return data;
+  } catch (error: any) {
+    console.log("Response:", error.response?.data);
+    console.log("Payload:", payload);
+    throw error;
+  }
+},
+updateStatus: async (
+  id: string,
+  status: "DRAFT" | "PUBLISHED"
+) => {
   const { data } = await api.patch(
-    `/cmsPages/cms/${id}`,
-    payload
+    `/cmsPages/cms/${id}/status`,
+    {
+      status,
+    }
   );
 
   return data;
+},
+uploadMedia: async (formData: FormData) => {
+  const { data } = await api.post(
+    "/cms/media",
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }
+  );
+    console.log("Upload Response:", data);
+  return data;
+
 },
 };

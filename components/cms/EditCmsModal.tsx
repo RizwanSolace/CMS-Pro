@@ -33,9 +33,10 @@ export default function EditCmsModal({
 
   const handleSubmit = async (data: CmsFormData) => {
     try {
-      await cmsService.update(page._id, data);
+     const res= await cmsService.update(page._id, data);
 
       alert("Page updated successfully");
+      return res
 
       onClose();
     } catch (error) {

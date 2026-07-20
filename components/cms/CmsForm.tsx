@@ -1,5 +1,5 @@
 "use client";
-
+import { useState } from "react";
 import Input from "@/components/common/Input";
 import Button from "@/components/common/Button";
 import { cmsService } from "@/services/cms.service";
@@ -29,7 +29,36 @@ export default function CmsForm({
   onSubmit,
 }: CmsFormProps)
  {
-  
+ const [featuredImage, setFeaturedImage] = useState(
+  initialData?.featuredImage ?? ""
+);
+
+const [uploading, setUploading] = useState(false);
+   
+const [imagePreview, setImagePreview] = useState("");       // Cloudinary URL
+ const handleImageUpload = async (
+  e: React.ChangeEvent<HTMLInputElement>
+) => {
+  const file = e.target.files?.[0];
+
+  if (!file) return;
+
+  try {
+    setUploading(true);
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const res = await cmsService.uploadMedia(formData);
+
+   setFeaturedImage(res.data._id);     // Send this to CMS API
+setImagePreview(res.data.url);      // Display this in UI
+  } catch (err) {
+    console.error(err);
+  } finally {
+    setUploading(false);
+  }
+};
 
   
   return (
@@ -55,9 +84,7 @@ export default function CmsForm({
           ).value,
         },
       },
-      featuredImage: (
-        form.elements.namedItem("featuredImage") as HTMLInputElement
-      ).value,
+     featuredImage,
       status: mode === "add" ? "Draft" : (initialData?.status ?? "Draft"),
     };
 
@@ -140,17 +167,29 @@ export default function CmsForm({
           defaultValue={initialData?.seoDescription??""}
         />
       </div> */}
-      <Input
-  id="featuredImage"
-  label="Featured Image"
-  defaultValue={initialData?.featuredImage ?? ""}
-  placeholder="Image ID"
-/>
+     <div>
+  <label className="mb-2 block text-sm font-medium text-slate-700">
+    Featured Image
+  </label>
+
+  <input
+    type="file"
+    accept="image/*"
+    onChange={handleImageUpload}
+    className="block w-full rounded-xl border border-slate-300 px-4 py-3"
+  />
+
+  {imagePreview && (
+    <img
+      src={imagePreview}
+      alt="Preview"
+      className="mt-4 h-40 rounded-xl border object-cover"
+    />
+  )}
+</div>
 
       
-        <label className="mb-2 block text-sm font-medium text-slate-700">
-          Status
-        </label>
+      
 
        <div>
   <label className="mb-2 block text-sm font-medium text-slate-700">
@@ -174,10 +213,12 @@ export default function CmsForm({
 </div>
 
       <div className="flex justify-end">
-        <Button type="submit">
-          {mode === "add"
-            ? "Create Page"
-            : "Update Page"}
+        <Button type="submit" disabled={uploading}>
+           {uploading
+    ? "Uploading..."
+    : mode === "add"
+    ? "Create Page"
+    : "Update Page"}
         </Button>
       </div>
     </form>

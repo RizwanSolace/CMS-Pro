@@ -45,7 +45,7 @@ export default function AddCmsModal() {
       },
       featuredImage: data.featuredImage,
     };
-
+console.log("Payload:", payload);
     const res = await cmsService.create(payload);
 
     console.log(res);

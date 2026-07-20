@@ -12,8 +12,7 @@ import { User } from "@/types/user";
 //import useUsers from "@/hooks/useUsers";
 interface UserTableProps {
   users: User[];
-   onRefresh: () => void;
-
+  onRefresh: () => void;
 }
 
 export default function UserTable({ users, onRefresh, }: UserTableProps) {
@@ -23,48 +22,77 @@ export default function UserTable({ users, onRefresh, }: UserTableProps) {
   const [openView, setOpenView] = useState(false);
   const [openEdit, setOpenEdit] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
-console.log("Users in table:", users);
+
+  const formatRole = (role: string) =>
+    role
+      .replace(/_/g, " ")
+      .toLowerCase()
+      .replace(/\b\w/g, (char) => char.toUpperCase());
+
+  const formatDate = (date: string) => {
+    const parsedDate = new Date(date);
+
+    if (Number.isNaN(parsedDate.getTime())) {
+      return date;
+    }
+
+    return parsedDate.toLocaleDateString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+  };
+
   return (
     <>
       <Table>
         <TableHead>
           <tr className="text-left">
-            <th className="px-6 py-4">Name</th>
-            <th>Email</th>
-            <th>Phone</th>
-            <th>Role</th>
-            <th>Status</th>
-            <th>Created</th>
-            <th className="text-center">Actions</th>
+            <th className="w-[17%] px-6 py-4">Name</th>
+            <th className="w-[25%] px-6 py-4">Email</th>
+            <th className="w-[15%] px-6 py-4">Phone</th>
+            <th className="w-[14%] px-6 py-4">Role</th>
+            <th className="w-[11%] px-6 py-4">Status</th>
+            <th className="w-[12%] px-6 py-4">Created</th>
+            <th className="w-[6%] px-6 py-4 text-center">Actions</th>
           </tr>
         </TableHead>
 
         <TableBody>
           {users.map((user) => (
             <tr
-              key={user.id}
+              key={user._id || user.id}
               className="hover:bg-slate-50"
             >
-              <td className="px-6 py-4 font-medium">
+              <td className="px-6 py-4 font-medium text-slate-800">
                 {user.name}
               </td>
 
-              <td>{user.email}</td>
+              <td className="max-w-72 px-6 py-4">
+                <span className="block truncate" title={user.email}>
+                  {user.email}
+                </span>
+              </td>
 
-              <td>{user.phone}</td>
+              <td className="whitespace-nowrap px-6 py-4">{user.phone}</td>
 
-              <td>{user.role}</td>
-              {/* if(user.status === "Active" || user.status === "Inactive" || user.status === "Blocked") { */}
+              <td className="px-6 py-4">
+                <span className="inline-flex whitespace-nowrap rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
+                  {formatRole(user.role)}
+                </span>
+              </td>
                
-              <td>
+              <td className="px-6 py-4">
                 <UserStatusBadge
                   status={user.isActive ? "Active" : "Inactive"}
                 />
               </td>
 
-              <td>{user.createdAt}</td>
+              <td className="whitespace-nowrap px-6 py-4 text-sm text-slate-600">
+                {formatDate(user.createdAt)}
+              </td>
 
-              <td>
+              <td className="px-6 py-4 text-center">
                 <UserActionMenu
                   targetUserRole={user.role}
                   onView={() => {
@@ -95,18 +123,16 @@ console.log("Users in table:", users);
         open={openEdit}
         user={selectedUser}
         onClose={() => setOpenEdit(false)}
-         onRefresh={onRefresh}
+        onRefresh={onRefresh}
       />
       <DeleteUserModal
-      
         open={openDelete}
         user={selectedUser}
         onClose={() => setOpenDelete(false)}
-         onConfirm={async () => {
-           console.log("Selected user before modal:", users);
-        await onRefresh();
-        setOpenDelete(false);
-    }}
+        onConfirm={async () => {
+          await onRefresh();
+          setOpenDelete(false);
+        }}
       />
     </>
   );

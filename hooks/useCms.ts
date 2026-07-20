@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { cmsService } from "@/services/cms.service";
+import { CmsPage } from "@/types/cms";
 
 export default function useCmsPages() {
-  const [pages, setPages] = useState([]);
+  const [pages, setPages] = useState<CmsPage[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchPages = async () => {
@@ -12,9 +13,11 @@ export default function useCmsPages() {
         limit: 10,
       });
 
-      console.log(res);
+      const nextPages = Array.isArray(res.data)
+        ? res.data
+        : res.data?.pages ?? [];
 
-      setPages(res.data.pages); // adjust after seeing API response
+      setPages(nextPages);
     } finally {
       setLoading(false);
     }

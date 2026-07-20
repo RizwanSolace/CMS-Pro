@@ -25,7 +25,7 @@ export interface CmsPage {
     };
   };
   featuredImage: string;
-  status: "DRAFT" | "PUBLISHED";
+  status: "Draft" | "Published";
   createdBy: {
     _id: string;
     name: string;

@@ -13,7 +13,6 @@ import CmsStatusBadge from "./CmsStatusBadge";
 import { useState} from 'react'
 import CmsActionMenu from "./CmsActionMenu";
 import { useRouter } from "next/navigation";
-import useCmsPages from "@/hooks/useCms";
 import { cmsService } from "@/services/cms.service";
 
 
@@ -25,7 +24,6 @@ export default function CmsTable({
   pages,
 }: CmsTableProps)
   {const [selectedPage, setSelectedPage] = useState<CmsPage | null>(null);
- const {  pages: cmsPages } = useCmsPages();
  const [openView, setOpenView] = useState(false);
  const [openEdit, setOpenEdit] = useState(false);
  const [openDelete, setOpenDelete] = useState(false);
@@ -44,6 +42,20 @@ export default function CmsTable({
     console.error(error);
   }
 };
+ const formatDate = (date: string) => {
+    const parsedDate = new Date(date);
+
+    if (Number.isNaN(parsedDate.getTime())) {
+      return date;
+    }
+
+    return parsedDate.toLocaleDateString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+  };
+
   return (
     <>
     <Table>
@@ -61,9 +73,9 @@ export default function CmsTable({
       </TableHead>
 
       <TableBody>
-        {cmsPages.map((page:any) => (
+        {pages.map((page) => (
           <tr
-            key={page._id}
+            key={page._id || page.id}
             className="hover:bg-slate-50"
           >
             <td className="px-6 py-4 font-medium">
@@ -78,7 +90,7 @@ export default function CmsTable({
               />
             </td>
 
-            <td>{page.createdBy.name}</td>
+            <td>{page.createdBy?.name ?? "Unknown"}</td>
 
             <td>{page.updatedAt}</td>
 
