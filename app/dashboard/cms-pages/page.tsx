@@ -5,7 +5,7 @@ import CmsTable from "@/components/cms/CmsTable";
 import  AddCmsModal  from "@/components/cms/AddCmsModal"
 
 export default function CmsPages() {
-  const { pages, loading } = useCmsPages();
+  const { pages, loading, fetchPages } = useCmsPages();
 
   return (
     <div className="space-y-8">
@@ -24,7 +24,7 @@ export default function CmsPages() {
           Loading CMS pages...
         </div>
       ) : pages.length > 0 ? (
-        <CmsTable pages={pages} />
+        <CmsTable pages={pages} refresh={fetchPages} />
       ) : (
         <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
           <h2 className="text-lg font-semibold text-slate-900">

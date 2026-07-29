@@ -2,7 +2,7 @@
 
 import Modal from "@/components/common/Modal";
 import CmsForm from "./CmsForm";
-import { CmsPage } from "@/types/cms";
+import { CmsPage, CreateCmsPagePayload } from "@/types/cms";
 import { cmsService } from "@/services/cms.service";
 
 interface EditCmsModalProps {
@@ -19,9 +19,31 @@ interface CmsFormData {
     hero: {
       title: string;
       subtitle: string;
+      ctaText?: string;
+      ctaLink?: string;
+    };
+    intro?: {
+      title: string;
+      body: string;
+    };
+    features?: Array<{
+      title: string;
+      description: string;
+    }>;
+    cta?: {
+      title: string;
+      description: string;
+      buttonText: string;
+      buttonLink: string;
+    };
+    seo?: {
+      title: string;
+      description: string;
+      keywords: string;
     };
   };
   featuredImage: string;
+  status?: "Draft" | "Published";
 }
 
 export default function EditCmsModal({
@@ -33,11 +55,17 @@ export default function EditCmsModal({
 
   const handleSubmit = async (data: CmsFormData) => {
     try {
-     const res= await cmsService.update(page._id, data);
+      const payload: CreateCmsPagePayload = {
+        title: data.title,
+        slug: data.slug.trim().replace(/^\/+|\/+$/g, ""),
+        description: data.description,
+        content: data.content,
+        featuredImage: data.featuredImage,
+      };
+
+      await cmsService.update(page._id, payload);
 
       alert("Page updated successfully");
-      return res
-
       onClose();
     } catch (error) {
       console.error(error);

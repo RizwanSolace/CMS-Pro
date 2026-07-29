@@ -163,7 +163,7 @@ onChange={(e) =>
             role: e.target.value,
         })
     }> 
-            <option value="SUPER_ADMIN">Super Admin</option>
+          
             <option value="ADMIN">Admin</option>
             <option value="EDITOR">Editor</option>
             <option value="USER">User</option>

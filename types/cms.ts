@@ -7,9 +7,30 @@ export interface CreateCmsPagePayload {
     hero: {
       title: string;
       subtitle: string;
+      ctaText?: string;
+      ctaLink?: string;
+    };
+    intro?: {
+      title: string;
+      body: string;
+    };
+    features?: Array<{
+      title: string;
+      description: string;
+    }>;
+    cta?: {
+      title: string;
+      description: string;
+      buttonText: string;
+      buttonLink: string;
+    };
+    seo?: {
+      title: string;
+      description: string;
+      keywords: string;
     };
   };
-  featuredImage: string;
+  featuredImage: string | { url: string; originalName?: string; _id?: string };
 }
 
 export interface CmsPage {
@@ -22,9 +43,30 @@ export interface CmsPage {
     hero: {
       title: string;
       subtitle: string;
+      ctaText?: string;
+      ctaLink?: string;
+    };
+    intro?: {
+      title: string;
+      body: string;
+    };
+    features?: Array<{
+      title: string;
+      description: string;
+    }>;
+    cta?: {
+      title: string;
+      description: string;
+      buttonText: string;
+      buttonLink: string;
+    };
+    seo?: {
+      title: string;
+      description: string;
+      keywords: string;
     };
   };
-  featuredImage: string;
+  featuredImage: string | { url: string; originalName?: string; _id?: string };
   status: "Draft" | "Published";
   createdBy: {
     _id: string;

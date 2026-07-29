@@ -3,37 +3,63 @@
 import Table from "@/components/common/table/Table";
 import TableHead from "@/components/common/table/TableHead";
 import TableBody from "@/components/common/table/Tablebody";
+import toast from "react-hot-toast";
+import { cmsService } from "@/services/cms.service";
 
 import { CmsPage } from "@/types/cms";
 import ViewCmsModal  from "./ViewCmsModal";
 import  DeleteCmsModal  from "./DeleteCmsModal";
 import EditCmsModal  from './EditCmsModal'
 
+
 import CmsStatusBadge from "./CmsStatusBadge";
 import { useState} from 'react'
 import CmsActionMenu from "./CmsActionMenu";
 import { useRouter } from "next/navigation";
-import { cmsService } from "@/services/cms.service";
+
 
 
 interface CmsTableProps {
   pages: CmsPage[];
+  refresh: () => void;
 }
 
 export default function CmsTable({
   pages,
+  refresh
 }: CmsTableProps)
+
   {const [selectedPage, setSelectedPage] = useState<CmsPage | null>(null);
  const [openView, setOpenView] = useState(false);
  const [openEdit, setOpenEdit] = useState(false);
  const [openDelete, setOpenDelete] = useState(false);
   const router = useRouter();
+ const handleDelete = async () => {
+  if (!selectedPage) return;
+
+  try {
+    await cmsService.deletePage(selectedPage._id);
+
+    toast.success("Page deleted successfully.");
+
+    setOpenDelete(false);
+     
+    // Refresh pages here
+  } catch (error: any) {
+    console.error(error);
+
+    toast.error(
+      error?.response?.data?.message ||
+      "Failed to delete page."
+    );
+  }
+};
   const handleView = async (id: string) => {
     console.log("View ID:", id)
   try {
     const res = await cmsService.view(id);
 
-    console.log(res);
+    console.log(res.data);
 
     setSelectedPage(res.data);
 
@@ -92,7 +118,7 @@ export default function CmsTable({
 
             <td>{page.createdBy?.name ?? "Unknown"}</td>
 
-            <td>{page.updatedAt}</td>
+            <td>{formatDate(page.updatedAt)}</td>
 
             <td className="relative overflow-visible text-center">
              <CmsActionMenu
@@ -106,6 +132,7 @@ export default function CmsTable({
   onDelete={() => {
     setSelectedPage(page);
     setOpenDelete(true);
+    
   }}
    onPreview={() =>
         router.push(`/dashboard/cms-pages/preview/${page._id}`)
@@ -133,10 +160,9 @@ export default function CmsTable({
   open={openDelete}
   page={selectedPage}
   onClose={() => setOpenDelete(false)}
-  onConfirm={() => {
-    console.log(selectedPage);
-    setOpenDelete(false);
-  }}
+ 
+    onConfirm={handleDelete}
+ 
 />
 </>
     

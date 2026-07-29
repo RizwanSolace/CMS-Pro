@@ -3,19 +3,12 @@
 import { useState } from "react";
 import { cmsService } from "@/services/cms.service";
 
-import { CmsPage } from "@/types/cms";
+import { CreateCmsPagePayload } from "@/types/cms";
 import Button from "@/components/common/Button";
 import Modal from "@/components/common/Modal";
 
 import CmsForm from "./CmsForm";
-interface AddCmsModalProps {
-  onClose?: () => void;
- 
-  mode: "add" | "edit";
-  initialData?: any;
-  onSubmit?: (data: CmsFormData) => Promise<void> | void;
 
-}
 interface CmsFormData {
   title: string;
   slug: string;
@@ -24,37 +17,55 @@ interface CmsFormData {
     hero: {
       title: string;
       subtitle: string;
+      ctaText?: string;
+      ctaLink?: string;
+    };
+    intro?: {
+      title: string;
+      body: string;
+    };
+    features?: Array<{
+      title: string;
+      description: string;
+    }>;
+    cta?: {
+      title: string;
+      description: string;
+      buttonText: string;
+      buttonLink: string;
+    };
+    seo?: {
+      title: string;
+      description: string;
+      keywords: string;
     };
   };
   featuredImage: string;
+  status?: "Draft" | "Published";
 }
 
 export default function AddCmsModal() {
   const [open, setOpen] = useState(false);
+
   const handleSubmit = async (data: CmsFormData) => {
-  try {
-    const payload = {
-      title: data.title,
-      slug: data.slug ,
-      description: data.description ,
-      content: {
-        hero: {   
-          title: data.content.hero.title,
-          subtitle: data.content.hero.subtitle,
-        },
-      },
-      featuredImage: data.featuredImage,
-    };
-console.log("Payload:", payload);
-    const res = await cmsService.create(payload);
+    try {
+      const payload: CreateCmsPagePayload = {
+        title: data.title,
+        slug: data.slug.trim().replace(/^\/+|\/+$/g, ""),
+        description: data.description,
+        content: data.content,
+        featuredImage: data.featuredImage,
+      };
 
-    console.log(res);
+      const res = await cmsService.create(payload);
 
-    alert("Page created successfully");
-  } catch (err) {
-    console.error(err);
-  }
-};
+      console.log(res);
+      alert("Page created successfully");
+      setOpen(false);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   return (
     <>

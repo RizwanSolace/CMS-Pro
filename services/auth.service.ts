@@ -112,5 +112,23 @@ updateProfile: async (
 
     return data;
   },
+  getAdminRequests(params?: any) {
+  return api.get("/requestAdmin", {
+    params,
+  });
+},
+
+approveAdminRequest(id: string) {
+  return api.patch(`/requestAdmin/${id}/approve`);
+},
+
+rejectAdminRequest(
+  id: string,
+  rejectionReason: string
+) {
+  return api.patch(`/requestAdmin/${id}/reject`, {
+    rejectionReason,
+  });
+}
 };
   

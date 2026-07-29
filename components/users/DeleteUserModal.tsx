@@ -24,28 +24,20 @@ export default function DeleteUserModal({
   onClose,
   onConfirm,
 }: DeleteUserModalProps) {
-  const handleDelete = async () => {
-  if (!user) return;
- console.log("Delete modal user:", user);
-  console.log("Delete id:", user?.id);
-console.log("user.id:", user?.id);
-console.log("user._id:", user?._id);
-  if (!user?.id) {
-    alert("User ID is missing");
-    return;
-  }
-  try {
-    await userService.deleteUser(user.id);
-
-    alert("User deleted successfully");
-
-   await onConfirm();
-    onClose();
-  } catch (err) {
-    console.error(err);
-  }
-};
   const users = useUsers();
+
+  const handleDelete = async () => {
+    if (!user) return;
+
+    try {
+      await userService.deleteUser(user._id);
+      onConfirm();
+      onClose();
+    } catch (error: any) {
+      console.error(error);
+    }
+  };
+
   if (!user) return null;
 
   return (

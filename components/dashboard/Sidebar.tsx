@@ -10,6 +10,8 @@ import {
   Settings,
   User,
   LogOut,
+  ShieldCheck,
+  Image
 } from "lucide-react";
 import clsx from "clsx";
 import { useRouter } from "next/navigation";
@@ -37,6 +39,12 @@ const menus = [
     roles: ["SUPER_ADMIN", "ADMIN", "EDITOR"],
   },
   {
+    title:"Media Library",
+    href:"/dashboard/media",
+    icon:Image,
+    roles:["SUPER_ADMIN", "ADMIN", "EDITOR"]
+  },
+  {
     title: "Roles",
     href: "/dashboard/roles",
     icon: Shield,
@@ -46,7 +54,7 @@ const menus = [
     title: "Settings",
     href: "/dashboard/settings",
     icon: Settings,
-    roles: ["SUPER_ADMIN"],
+    roles: ["SUPER_ADMIN","ADMIN","EDITOR"],
   },
   {
     title: "Profile",
@@ -54,6 +62,12 @@ const menus = [
     icon: User,
     roles: ["SUPER_ADMIN", "ADMIN", "EDITOR"],
   },
+  {
+title: "Admin Requests",
+  href: "/dashboard/admin-requests",
+  icon: ShieldCheck,
+  roles:["SUPER_ADMIN"]
+}
 ];
 
 export default function Sidebar() {
@@ -81,7 +95,7 @@ const handleLogout = () => {
         </h2>
 
         <p className="mt-1 text-sm text-slate-500">
-          Admin Panel
+          {role} Panel
         </p>
       </div>
 

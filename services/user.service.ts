@@ -79,4 +79,9 @@ createAdmin: async (payload: CreateAdminPayload) => {
   const { data } = await api.post("/manageUser/admin", payload);
   return data;
 },
+requestAdmin(reason: string) {
+  return api.post("/requestAdmin", {
+    reason,
+  });
+}
 }

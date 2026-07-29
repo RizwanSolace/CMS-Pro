@@ -19,6 +19,9 @@ export const cmsService = {
   const { data } = await api.get(`/cmsPages/cms/${id}`);
   return data;
 },
+deletePage(id: string) {
+  return api.delete(`/cmsPages/cms/${id}`);
+},
 getAll: async (params?: {
   page?: number;
   limit?: number;
@@ -37,18 +40,7 @@ getAll: async (params?: {
   },
 update: async (
   id: string,
-  payload: {
-    title: string;
-    slug: string;
-    description: string;
-    content: {
-      hero: {
-        title: string;
-        subtitle: string;
-      };
-    };
-    featuredImage: string;
-  }
+  payload: CreateCmsPagePayload
 ) => {
    try {
     const { data } = await api.post("/cmsPages/cms", payload);
@@ -86,4 +78,24 @@ uploadMedia: async (formData: FormData) => {
   return data;
 
 },
+
+  getAllMedia(params?: {
+    page?: number;
+    limit?: number;
+    search?: string;
+    sortBy?: string;
+    sortOrder?: "asc" | "desc";
+  }) {
+    return api.get("/cms/media", {
+      params,
+    });
+  },
+
+  getMediaById(id: string) {
+    return api.get(`/cms/media/${id}`);
+  },
+
+  deleteMedia(id: string) {
+    return api.delete(`/cms/media/${id}`);
+  },
 };
