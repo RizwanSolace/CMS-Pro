@@ -6,15 +6,25 @@ import Button from "@/components/common/Button";
 import Modal from "@/components/common/Modal";
 import UserForm from "./UserForm";
 
-export default function AddUserModal() {
+interface AddUserModalProps {
+  onRefresh?: () => Promise<void> | void;
+}
+
+export default function AddUserModal({ onRefresh }: AddUserModalProps) {
   const [open, setOpen] = useState(false);
+
+  const handleClose = () => setOpen(false);
+
+  const handleRefresh = async () => {
+    await onRefresh?.();
+    setOpen(false);
+  };
 
   return (
     <>
       <Button onClick={() => setOpen(true)}>
         Add User
       </Button>
-      <div className="w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-2xl bg-white">
 
       <Modal
         open={open}
@@ -23,13 +33,10 @@ export default function AddUserModal() {
         size="lg"
       >
         <UserForm
-          onCancel={() => setOpen(false)}
-          onRefresh={() => {
-            setOpen(false);
-          }}
+          onCancel={handleClose}
+          onRefresh={handleRefresh}
         />
       </Modal>
-      </div>
     </>
   );
 }

@@ -23,7 +23,7 @@ export default function DeleteRoleModal({
     <Modal
       open={open}
       onClose={onClose}
-      title="Delete CMS Page"
+      title="Delete Role"
     >
       <div className="space-y-6 text-center">
 
@@ -59,7 +59,7 @@ export default function DeleteRoleModal({
             variant="danger"
             onClick={onConfirm}
           >
-            Delete Page
+            Delete Role
           </Button>
 
         </div>

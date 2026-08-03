@@ -16,14 +16,14 @@ export default function RolePermissionBadge({
       {visible.map((permission) => (
         <span
           key={permission}
-          className="rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-700"
+          className="rounded-full bg-blue-600 px-3 py-1 text-xs font-semibold text-white"
         >
           {permission}
         </span>
       ))}
 
       {remaining > 0 && (
-        <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium">
+        <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
           +{remaining}
         </span>
       )}

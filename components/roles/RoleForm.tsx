@@ -77,17 +77,21 @@ export default function RoleForm({
           Role Name
         </label>
 
-    <select
-  value={name}
-  onChange={(e) => setName(e.target.value)}
-  className="w-full rounded-lg border border-slate-300 p-3"
->
-  {ROLE_OPTIONS.map((role) => (
-    <option key={role} value={role}>
-      {role}
-    </option>
-  ))}
-</select>
+        <select
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+          required
+        >
+          <option value="" disabled>
+            Select a role
+          </option>
+          {ROLE_OPTIONS.map((roleOption) => (
+            <option key={roleOption} value={roleOption}>
+              {roleOption}
+            </option>
+          ))}
+        </select>
       </div>
 
       <div>
@@ -109,25 +113,30 @@ export default function RoleForm({
           Permissions
         </label>
 
-        <div className="grid grid-cols-2 gap-3">
-          {ALL_PERMISSIONS.map((permission) => (
-            <label
-              key={permission}
-              className="flex items-center gap-2"
-            >
-              <input
-                type="checkbox"
-                checked={permissions.includes(
-                  permission
-                )}
-                onChange={() =>
-                  togglePermission(permission)
-                }
-              />
+        <div className="grid gap-3 sm:grid-cols-2">
+          {ALL_PERMISSIONS.map((permission) => {
+            const isSelected = permissions.includes(permission);
 
-              {permission}
-            </label>
-          ))}
+            return (
+              <label
+                key={permission}
+                className={`inline-flex cursor-pointer items-center justify-between rounded-full border px-3 py-2 text-sm font-medium transition ${
+                  isSelected
+                    ? "border-blue-600 bg-blue-600 text-white"
+                    : "border-slate-300 bg-white text-slate-700 hover:border-blue-400 hover:bg-slate-50"
+                }`}
+              >
+                <span>{permission}</span>
+
+                <input
+                  type="checkbox"
+                  checked={isSelected}
+                  onChange={() => togglePermission(permission)}
+                  className="hidden"
+                />
+              </label>
+            );
+          })}
         </div>
       </div>
 

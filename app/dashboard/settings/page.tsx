@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Bell, CheckCircle2, ShieldCheck, Sparkles } from "lucide-react";
+import { useState } from "react";
+import { CheckCircle2, FileCheck2, ShieldCheck, Sparkles } from "lucide-react";
 
 import Button from "@/components/common/Button";
 import Input from "@/components/common/Input";
@@ -13,7 +13,7 @@ type SettingsState = {
   contactPhone: string;
   footerText: string;
   timezone: string;
-  notifications: "all" | "important" | "none";
+  defaultPageStatus: "Draft" | "Published";
   autoSave: boolean;
   showTips: boolean;
 };
@@ -24,37 +24,42 @@ const defaultSettings: SettingsState = {
   adminEmail: "admin@cmspro.com",
   contactPhone: "+1 555 0123",
   footerText: "A modern content experience for growing brands.",
-  timezone: "Asia/Karachi",
-  notifications: "all",
+  timezone: "Asia/Delhi",
+  defaultPageStatus: "Draft",
   autoSave: true,
   showTips: true,
 };
 
 const timezoneOptions = [
   "UTC",
-  "Asia/Karachi",
+  "Asia/Delhi",
   "Asia/Dubai",
   "Europe/London",
   "America/New_York",
 ];
 
-export default function SettingsPage() {
-  const [settings, setSettings] = useState<SettingsState>(defaultSettings);
-  const [saved, setSaved] = useState(false);
+const normalizeSettings = (settings: Partial<SettingsState>): SettingsState => ({
+  ...defaultSettings,
+  ...settings,
+  defaultPageStatus: settings.defaultPageStatus ?? defaultSettings.defaultPageStatus,
+});
 
-  useEffect(() => {
-    if (typeof window === "undefined") return;
+export default function SettingsPage() {
+  const [settings, setSettings] = useState<SettingsState>(() => {
+    if (typeof window === "undefined") return defaultSettings;
 
     const storedSettings = window.localStorage.getItem("cms-pro-settings");
 
-    if (storedSettings) {
-      try {
-        setSettings(JSON.parse(storedSettings));
-      } catch {
-        window.localStorage.removeItem("cms-pro-settings");
-      }
+    if (!storedSettings) return defaultSettings;
+
+    try {
+      return normalizeSettings(JSON.parse(storedSettings));
+    } catch {
+      window.localStorage.removeItem("cms-pro-settings");
+      return defaultSettings;
     }
-  }, []);
+  });
+  const [saved, setSaved] = useState(false);
 
   const handleSave = (event: React.FormEvent) => {
     event.preventDefault();
@@ -77,13 +82,13 @@ export default function SettingsPage() {
 
             <h1 className="text-3xl font-bold text-slate-900">Settings</h1>
             <p className="mt-2 max-w-2xl text-slate-500">
-              Manage the defaults for your CMS workspace, notifications, and day-to-day workflow.
+              Manage the defaults for your CMS workspace, publishing flow, and day-to-day editing.
             </p>
           </div>
 
           <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
             <p className="font-semibold text-slate-900">Current setup</p>
-            <p className="mt-1">{settings.siteName} • {settings.timezone}</p>
+            <p className="mt-1">{settings.siteName} / {settings.timezone}</p>
           </div>
         </div>
       </div>
@@ -167,30 +172,32 @@ export default function SettingsPage() {
           <section className="space-y-4">
             <div>
               <h2 className="flex items-center gap-2 text-lg font-semibold text-slate-900">
-                <Bell size={18} />
-                Notifications
+                <FileCheck2 size={18} />
+                Publishing workflow
               </h2>
               <p className="text-sm text-slate-500">
-                Choose how the team should be notified about content updates and approvals.
+                Set sensible defaults for how pages move from draft to live content.
               </p>
             </div>
 
             <label className="block">
-              <span className="mb-2 block text-sm font-medium text-gray-700">Email preference</span>
+              <span className="mb-2 block text-sm font-medium text-gray-700">Default page status</span>
               <select
-                value={settings.notifications}
+                value={settings.defaultPageStatus}
                 onChange={(event) =>
                   setSettings((prev) => ({
                     ...prev,
-                    notifications: event.target.value as SettingsState["notifications"],
+                    defaultPageStatus: event.target.value as SettingsState["defaultPageStatus"],
                   }))
                 }
                 className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm text-slate-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-300"
               >
-                <option value="all">All updates</option>
-                <option value="important">Important only</option>
-                <option value="none">Do not notify</option>
+                <option value="Draft">Draft</option>
+                <option value="Published">Published</option>
               </select>
+              <p className="mt-2 text-xs text-slate-500">
+                New CMS pages should start as drafts unless your team is ready to publish immediately.
+              </p>
             </label>
 
             <label className="flex items-center justify-between rounded-xl border border-slate-200 px-4 py-3">
@@ -243,9 +250,9 @@ export default function SettingsPage() {
           </div>
 
           <ul className="space-y-3 text-sm text-slate-600">
-            <li>• General workspace information for admins and editors.</li>
-            <li>• Notification preferences for content approvals and updates.</li>
-            <li>• Small workflow defaults to make the CMS easier to manage.</li>
+            <li>- General workspace information for admins and editors.</li>
+            <li>- Publishing defaults for new CMS pages.</li>
+            <li>- Small editing preferences to make the CMS easier to manage.</li>
           </ul>
 
           <div className="rounded-xl border border-blue-100 bg-blue-50 p-4 text-sm text-blue-700">

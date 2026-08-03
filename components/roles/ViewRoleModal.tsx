@@ -54,10 +54,7 @@ export default function ViewRoleModal({
             <p>{role.users}</p>
           </div>
 
-          <div>
-            <p className="text-sm text-slate-500">Created</p>
-            <p>{role.createdAt}</p>
-          </div>
+         
         </div>
       </div>
     </Modal>

@@ -3,10 +3,10 @@
 import Input from "@/components/common/Input";
 import PasswordInput from "@/components/common/PasswordInput";
 import Button from "@/components/common/Button";
-import {User} from "@/types/user";
-import { useState } from "react";
+import { User } from "@/types/user";
+import { FormEvent, useState } from "react";
+import { toast } from "react-toastify";
 import { userService } from "@/services/user.service";
-import useUsers from "@/hooks/useUsers";
 
 interface UserFormProps {
   isEdit?: boolean;
@@ -36,7 +36,7 @@ export default function UserForm({
     password: "",
   confirmPassword: "",
 });
-const handleSubmit = async (e: React.FormEvent) => {
+const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
   e.preventDefault();
 
   try {
@@ -51,7 +51,7 @@ const handleSubmit = async (e: React.FormEvent) => {
         isActive: formData.isActive,
       });
 
-      alert("User updated successfully");
+      toast.success("User updated successfully.");
     } else {
       const payload = {
         name: formData.name,
@@ -60,34 +60,40 @@ const handleSubmit = async (e: React.FormEvent) => {
         password: formData.password,
         confirmPassword: formData.confirmPassword,
       };
-       console.log(formData);
-       console.log("Submitting:", {
-  name: formData.name,
-  email: formData.email,
-  phone: formData.phone,
-  role: formData.role,
-});
+
+      let response: any;
+
       switch (formData.role) {
         case "ADMIN":
-          await userService.createAdmin(payload);
-          alert("Admin created successfully");
+          response = await userService.createAdmin(payload);
           break;
 
         case "EDITOR":
-          await userService.createEditor(payload);
-          alert("Editor created successfully");
+          response = await userService.createEditor(payload);
           break;
 
-       
-        
+        default:
+          throw new Error("Please select a valid role to create the user.");
       }
-        alert("User created successfully");
+
+      const successMessage =
+        response?.message ||
+        (formData.role === "ADMIN"
+          ? "Admin created successfully."
+          : formData.role === "EDITOR"
+          ? "Editor created successfully."
+          : "User created successfully.");
+
+      toast.success(successMessage);
     }
 
     await onRefresh();
     onCancel();
-  } catch (err) {
+  } catch (err: any) {
     console.error(err);
+    const errorMessage =
+      err?.response?.data?.message || err?.message || "Failed to save user.";
+    toast.error(errorMessage);
   }
 };
 

@@ -1,12 +1,9 @@
 "use client";
 import RoleGuard from "@/components/auth/RoleGuard";
-import { Plus } from "lucide-react";
 import UserFilters from "@/components/users/UserFilters";
-import Button from "@/components/common/Button";
 import AddUserModal from "@/components/users/AddUserModal";
 import UserTable from "@/components/users/UserTable";
 import useUsers from "@/hooks/useUsers";
-import { mockUsers } from "@/data/mockUsers";
 import { useMemo, useState } from "react";
 
 
@@ -78,7 +75,7 @@ if (error) {
           </p>
         </div>
 
-       <AddUserModal  />
+       <AddUserModal onRefresh={fetchUsers} />
        
       </div>
 <UserFilters 

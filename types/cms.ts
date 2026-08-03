@@ -30,7 +30,7 @@ export interface CreateCmsPagePayload {
       keywords: string;
     };
   };
-  featuredImage: string | { url: string; originalName?: string; _id?: string };
+  featuredImage: string | { url: string; originalName?: string; _id?: string; id?: string };
 }
 
 export interface CmsPage {
@@ -66,7 +66,7 @@ export interface CmsPage {
       keywords: string;
     };
   };
-  featuredImage: string | { url: string; originalName?: string; _id?: string };
+  featuredImage: string | { url: string; originalName?: string; _id?: string; id?: string };
   status: "Draft" | "Published";
   createdBy: {
     _id: string;

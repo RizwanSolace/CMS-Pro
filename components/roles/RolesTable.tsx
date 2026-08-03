@@ -10,8 +10,6 @@ import { Role } from "@/types/role";
 
 import RoleActionMenu from "./RoleActionMenu";
 import ViewRoleModal from "./ViewRoleModal";
-import EditRoleModal from "./EditRoleModal";
-import DeleteRoleModal from "./DeleteRoleModal";
 import RolePermissionBadge from "./RolePermissionBadge";
 
 interface RolesTableProps {
@@ -25,12 +23,6 @@ export default function RolesTable({
     useState<Role | null>(null);
 
   const [openView, setOpenView] =
-    useState(false);
-
-  const [openEdit, setOpenEdit] =
-    useState(false);
-
-  const [openDelete, setOpenDelete] =
     useState(false);
 
   return (
@@ -48,7 +40,7 @@ export default function RolesTable({
 
             <th>Users</th>
 
-            <th>Created</th>
+            
 
             <th className="text-center">
               Actions
@@ -78,21 +70,13 @@ export default function RolesTable({
 
               <td>{role.users}</td>
 
-              <td>{role.createdAt}</td>
+            
 
               <td className="text-center">
                 <RoleActionMenu
                   onView={() => {
                     setSelectedRole(role);
                     setOpenView(true);
-                  }}
-                  onEdit={() => {
-                    setSelectedRole(role);
-                    setOpenEdit(true);
-                  }}
-                  onDelete={() => {
-                    setSelectedRole(role);
-                    setOpenDelete(true);
                   }}
                 />
               </td>
@@ -107,26 +91,6 @@ export default function RolesTable({
         onClose={() =>
           setOpenView(false)
         }
-      />
-
-      <EditRoleModal
-        open={openEdit}
-        role={selectedRole}
-        onClose={() =>
-          setOpenEdit(false)
-        }
-      />
-
-      <DeleteRoleModal
-        open={openDelete}
-        role={selectedRole}
-        onClose={() =>
-          setOpenDelete(false)
-        }
-        onConfirm={() => {
-          console.log(selectedRole);
-          setOpenDelete(false);
-        }}
       />
     </>
   );

@@ -20,7 +20,7 @@ export default function EditRoleModal({
     <Modal
       open={open}
       onClose={onClose}
-      title="Edit CMS Page"
+      title="Edit Role"
     >
     <RoleForm
     initialData={{

@@ -3,7 +3,6 @@
 import { useState } from "react";
 import Modal from "@/components/common/Modal";
 import Button from "@/components/common/Button";
-import RoleForm from "./RoleForm"; 
 
 interface AddRoleModalProps {
   open: boolean;
@@ -130,13 +129,6 @@ export default function AddRoleModal({
         </div>
 
       </div>
-       <RoleForm
-    onSubmit={(data)=>{
-        console.log(data);
-        onClose();
-    }}
-/>
     </Modal>
-   
   );
 }

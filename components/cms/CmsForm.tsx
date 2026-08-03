@@ -1,13 +1,30 @@
 "use client";
-import { useState, type ChangeEvent, type FormEvent } from "react";
+import { useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import Input from "@/components/common/Input";
 import Button from "@/components/common/Button";
 import { cmsService } from "@/services/cms.service";
+import type { CmsPage } from "@/types/cms";
+import { ImagePlus, Images } from "lucide-react";
+import ChooseMediaModal from "./ChooseMediaModal";
 
 interface CmsFormProps {
   mode: "add" | "edit";
-  initialData?: any;
+  initialData?: Partial<CmsPage>;
   onSubmit?: (data: CmsFormData) => void | Promise<void>;
+}
+
+interface MediaItem {
+  id: string;
+  name: string;
+  url: string;
+}
+
+interface ServerMedia {
+  _id: string;
+  id?: string;
+  name?: string;
+  originalName?: string;
+  url: string;
 }
 
 interface CmsFormData {
@@ -46,16 +63,35 @@ interface CmsFormData {
 }
 
 export default function CmsForm({ mode, initialData, onSubmit }: CmsFormProps) {
-  const [featuredImage, setFeaturedImage] = useState(initialData?.featuredImage ?? "");
+  const initialFeaturedImage =
+    typeof initialData?.featuredImage === "string"
+      ? initialData.featuredImage
+      : initialData?.featuredImage?._id ?? initialData?.featuredImage?.id ?? "";
+  const [featuredImage, setFeaturedImage] = useState(initialFeaturedImage);
   const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [openMedia, setOpenMedia] = useState(false);
+  const [mediaLoading, setMediaLoading] = useState(false);
+  const [media, setMedia] = useState<MediaItem[]>([]);
   const [imagePreview, setImagePreview] = useState(() => {
     if (typeof initialData?.featuredImage === "string" && initialData.featuredImage.startsWith("http")) {
       return initialData.featuredImage;
     }
-    if (initialData?.featuredImage?.url) {
+    if (typeof initialData?.featuredImage !== "string" && initialData?.featuredImage?.url) {
       return initialData.featuredImage.url;
     }
     return "";
+  });
+  const [selectedMedia, setSelectedMedia] = useState<MediaItem | null>(() => {
+    if (typeof initialData?.featuredImage !== "string" && initialData?.featuredImage?.url) {
+      return {
+        id: initialData.featuredImage._id ?? initialData.featuredImage.id ?? "",
+        name: initialData.featuredImage.originalName ?? "Featured image",
+        url: initialData.featuredImage.url,
+      };
+    }
+
+    return null;
   });
 
   const [formValues, setFormValues] = useState({
@@ -104,11 +140,44 @@ export default function CmsForm({ mode, initialData, onSubmit }: CmsFormProps) {
 
       setFeaturedImage(res.data._id);
       setImagePreview(res.data.url);
+      setSelectedMedia({
+        id: res.data._id,
+        name: res.data.originalName ?? file.name,
+        url: res.data.url,
+      });
     } catch (err) {
       console.error(err);
     } finally {
       setUploading(false);
+      event.target.value = "";
     }
+  };
+
+  const loadMediaLibrary = async () => {
+    try {
+      setMediaLoading(true);
+      const res = await cmsService.getAllMedia({
+        limit: 100,
+        sortBy: "createdAt",
+        sortOrder: "desc",
+      });
+      const savedMedia = ((res.data?.data ?? []) as ServerMedia[]).map((item) => ({
+        id: item._id,
+        name: item.originalName ?? item.name ?? "Untitled image",
+        url: item.url,
+      }));
+
+      setMedia(savedMedia);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setMediaLoading(false);
+    }
+  };
+
+  const handleOpenMediaLibrary = () => {
+    setOpenMedia(true);
+    loadMediaLibrary();
   };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -392,23 +461,51 @@ export default function CmsForm({ mode, initialData, onSubmit }: CmsFormProps) {
         </div>
       </section>
 
-      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-        <h3 className="mb-4 text-lg font-semibold text-slate-800">Media</h3>
-        <input
-          type="file"
-          accept="image/*"
-          onChange={handleImageUpload}
-          className="block w-full rounded-xl border border-slate-300 px-4 py-3"
-        />
+      <div className="rounded-xl border p-5">
+        <h4 className="font-semibold">Featured Image</h4>
 
-        {imagePreview && (
+        {imagePreview ? (
           <img
             src={imagePreview}
-            alt="Preview"
-            className="mt-4 h-40 rounded-xl border object-cover"
+            alt={selectedMedia?.name ?? "Featured image preview"}
+            className="mt-4 h-56 w-full rounded-xl object-cover"
           />
+        ) : (
+          <div className="mt-4 flex h-56 items-center justify-center rounded-xl border-2 border-dashed">
+            No Image Selected
+          </div>
         )}
-      </section>
+
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          hidden
+          onChange={handleImageUpload}
+        />
+
+        <div className="mt-5 flex flex-col gap-3 sm:flex-row">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploading}
+            className="flex items-center justify-center gap-2"
+          >
+            <ImagePlus size={18} />
+            {uploading ? "Uploading..." : "Upload Image"}
+          </Button>
+
+          <Button
+            type="button"
+            onClick={handleOpenMediaLibrary}
+            className="flex items-center justify-center gap-2"
+          >
+            <Images size={18} />
+            Import From Media Library
+          </Button>
+        </div>
+      </div>
 
       <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
         <label className="mb-2 block text-sm font-medium text-slate-700">Status</label>
@@ -434,6 +531,19 @@ export default function CmsForm({ mode, initialData, onSubmit }: CmsFormProps) {
           {uploading ? "Uploading..." : mode === "add" ? "Create Page" : "Update Page"}
         </Button>
       </div>
+      <ChooseMediaModal
+        open={openMedia}
+        onClose={() => setOpenMedia(false)}
+        media={media}
+        selected={selectedMedia?.id}
+        loading={mediaLoading}
+        onSelect={(item) => {
+          setSelectedMedia(item);
+          setFeaturedImage(item.id);
+          setImagePreview(item.url);
+          setOpenMedia(false);
+        }}
+      />
     </form>
   );
 }

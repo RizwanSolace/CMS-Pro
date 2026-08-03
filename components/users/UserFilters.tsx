@@ -52,7 +52,7 @@ export default function UserFilters({
         value={role}
         onChange={(e) => onRoleChange(e.target.value)}
         className="rounded-xl border border-slate-300 px-4 py-2.5 outline-none transition focus:border-blue-600">
-          <option>All Roles</option>
+          <option value="All Roles">All Roles</option>
           <option value="SUPER_ADMIN">Super Admin</option>
           <option value="ADMIN">Admin</option>
           <option value="EDITOR">Editor</option>
@@ -64,7 +64,7 @@ export default function UserFilters({
         value={status}
         onChange={(e) => onStatusChange(e.target.value)}
         className="rounded-xl border border-slate-300 px-4 py-2.5 outline-none transition focus:border-blue-600">
-          <option value="ALL">All Status</option>
+          <option value="All Status">All Status</option>
           <option value="ACTIVE">Active</option>
           <option value="INACTIVE">Inactive</option>
           <option value="BLOCKED">Blocked</option>

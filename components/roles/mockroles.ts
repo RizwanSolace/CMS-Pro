@@ -10,9 +10,11 @@ export const mockRoles: Role[] = [
       "Roles",
       "CMS",
       "Settings",
+      "Media Library",
+      "Admin Requests", 
     ],
-    users: 1,
-    createdAt: "06 Jul 2026",
+    users: 1
+    
   },
   {
     id: "2",
@@ -21,9 +23,11 @@ export const mockRoles: Role[] = [
     permissions: [
       "Users",
       "CMS",
+      "Media Library",
+     
     ],
     users: 4,
-    createdAt: "05 Jul 2026",
+  
   },
   {
     id: "3",
@@ -31,8 +35,11 @@ export const mockRoles: Role[] = [
     description: "Manage CMS pages",
     permissions: [
       "CMS",
+      "Media Library",
+      "Admin Requests"
+
     ],
     users: 12,
-    createdAt: "02 Jul 2026",
+ 
   },
 ];
