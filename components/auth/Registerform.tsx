@@ -2,8 +2,6 @@
 
 import Link from "next/link";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-
 
 import Input from "@/components/common/Input";
 import PasswordInput from "@/components/common/PasswordInput";
@@ -11,6 +9,7 @@ import Button from "@/components/common/Button";
 import {
   applyApiValidationErrors,
   getApiErrorMessage,
+  getApiValidationErrors,
 } from "@/lib/api-response";
 import { useRouter } from "next/navigation";
 
@@ -18,7 +17,7 @@ import {toSignupPayload} from  "@/lib/mappers/auth.mapper";
 import { authService } from "@/services/auth.service";
 import { toast } from "react-toastify";
 
-import {registerSchema,RegisterFormData}  from "@/lib/validation/auth";
+import { RegisterFormData } from "@/lib/validation/auth";
 
 export default function RegisterForm() {
     const router = useRouter();
@@ -28,7 +27,6 @@ export default function RegisterForm() {
     setError,
     formState: { errors, isSubmitting },
   } = useForm<RegisterFormData>({
-    resolver: zodResolver(registerSchema),
     defaultValues: {
       firstName: "",
       lastName: "",
@@ -41,99 +39,35 @@ export default function RegisterForm() {
 
   const onSubmit = async (data: RegisterFormData) => {
     try {
-    const payload = toSignupPayload(data);
-    const response = await authService.register(payload);
-    // Some APIs return 200 with success: false and include validation errors.
-    if (response && (response as any).success === false) {
-      const resp = response as any;
+      const payload = toSignupPayload(data);
+      const response = await authService.register(payload);
 
-      const mapField = (fieldName: string | undefined) => {
-        if (!fieldName) return fieldName;
-        if (fieldName.startsWith("body.")) {
-          return fieldName.split(".").pop();
-        }
-        if (fieldName === "name") {
-          return "firstName";
-        }
-        return fieldName;
-      };
+      toast.success(response.message || "Account created successfully.");
 
-      const setServerError = (fieldName: string, message: string) => {
-        const mappedField = mapField(fieldName) as any;
+      router.push(
+        `/verify-email?email=${encodeURIComponent(payload.email)}`
+      );
+    } catch (error) {
+      const hadFieldErrors = applyApiValidationErrors(error, setError, {
+        name: "firstName",
+      });
 
-        if (mappedField) {
-          setError(mappedField, {
-            type: "server",
-            message,
-          });
-          return true;
-        }
-
-        return false;
-      };
-
-      let handled = false;
-
-      if (Array.isArray(resp.errors)) {
-        resp.errors.forEach((item: any) => {
-          const fieldName = item.field || item.path || item.param;
-          const message = item.message || item.msg;
-
-          if (fieldName && message) {
-            handled = setServerError(fieldName, message) || handled;
+      const apiErrors = getApiValidationErrors(error);
+      if (Array.isArray(apiErrors)) {
+        apiErrors.forEach((item) => {
+          const message = item?.message || item?.msg;
+          if (typeof message === "string") {
+            toast.error(message);
           }
         });
-      } else if (resp.errors && typeof resp.errors === "object") {
-        Object.entries(resp.errors).forEach(([k, v]) => {
-          const fieldName = mapField(k);
-          const message = Array.isArray(v) ? v[0] : v;
-
-          if (typeof fieldName === "string" && typeof message === "string") {
-            setError(fieldName as any, {
-              type: "server",
-              message,
-            });
-            handled = true;
-          }
-        });
+      } else if (hadFieldErrors) {
+        // If field errors were applied but there is also a top-level message,
+        // show that too for general validation failure.
+        toast.error(getApiErrorMessage(error, "Registration failed. Please try again."));
+      } else {
+        toast.error(getApiErrorMessage(error, "Registration failed. Please try again."));
       }
-
-      if (!handled && Array.isArray(resp.message)) {
-        resp.message.forEach((item: any) => {
-          if (item && typeof item === "object") {
-            const fieldName = item.field || item.path || item.param;
-            const message = item.message || item.msg;
-
-            if (fieldName && message) {
-              handled = setServerError(fieldName, message) || handled;
-            }
-          } else if (typeof item === "string") {
-            toast.error(item);
-            handled = true;
-          }
-        });
-      }
-
-      if (!handled) {
-        const msg = typeof resp.message === "string" ? resp.message : resp.error;
-        toast.error(msg || "Registration failed. Please try again.");
-      }
-
-      return;
     }
-
-    toast.success(response.message || "Account created successfully.");
-
-    router.push(
-      `/verify-email?email=${encodeURIComponent(payload.email)}`
-    );
-
-  } catch (error) {
-    applyApiValidationErrors(error, setError, {
-      name: "firstName",
-    });
-    toast.error(getApiErrorMessage(error, "Registration failed. Please try again."));
-  }
   };
 
   return (
@@ -158,7 +92,9 @@ export default function RegisterForm() {
             label="First Name"
             placeholder="John"
             required
-            {...register("firstName")}
+ {...register("firstName", {
+    required: "First Name is required",
+  })}
             error={errors.firstName?.message}
           />
 
@@ -167,7 +103,9 @@ export default function RegisterForm() {
             label="Last Name"
             placeholder="Doe"
             required
-            {...register("lastName")}
+             {...register("lastName", {
+    required: "Last Name is required",
+  })}
             error={errors.lastName?.message}
           />
         </div>
@@ -178,7 +116,9 @@ export default function RegisterForm() {
           label="Email Address"
           placeholder="john@example.com"
           required
-          {...register("email")}
+         {...register("email", {
+    required: "Email is required",
+  })}
           error={errors.email?.message}
         />
 
@@ -188,7 +128,9 @@ export default function RegisterForm() {
           label="Phone Number"
           placeholder="9876543210"
           required
-          {...register("phone")}
+          {...register("phone", {
+    required: "Phone number is required",
+  } )}
           error={errors.phone?.message}
         />
 
@@ -197,16 +139,24 @@ export default function RegisterForm() {
           label="Password"
           placeholder="Enter your password"
           required
-          {...register("password")}
+          {...register("password", {
+    required: "Password is required",
+  })}
           error={errors.password?.message}
         />
+
+        <p className="text-sm text-slate-500">
+          Password must be at least 8 characters and include one uppercase letter, one lowercase letter, and one special character.
+        </p>
 
         <PasswordInput
           id="confirmPassword"
           label="Confirm Password"
           placeholder="Confirm your password"
           required
-          {...register("confirmPassword")}
+          {...register("confirmPassword", {
+    required: "Please confirm your password",
+  })}
           error={errors.confirmPassword?.message}
         />
 

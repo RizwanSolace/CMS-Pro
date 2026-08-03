@@ -1,32 +1,14 @@
 import { z } from "zod";
 
-export const registerSchema = z
-  .object({
-    firstName: z
-      .string()
-      .min(2, "First name must be at least 2 characters"),
+export const registerSchema = z.object({
+  firstName: z.string().optional(),
+  lastName: z.string().optional(),
+  email: z.string().optional(),
+  phone: z.string().optional(),
+  password: z.string().optional(),
+  confirmPassword: z.string().optional(),
+});
 
-    lastName: z
-      .string()
-      .min(2, "Last name must be at least 2 characters"),
-
-    email: z
-      .string()
-      .email("Invalid email"),
-    phone: z
-      .string()
-      .regex(/^[0-9]{10}$/, "Invalid mobile number"),
-
-    password: z
-      .string()
-      .min(8, "Password must be at least 8 characters"),
-
-    confirmPassword: z.string(),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    path: ["confirmPassword"],
-    message: "Passwords do not match",
-  });
 export type RegisterFormData = z.infer<typeof registerSchema>;
 export const loginSchema = z.object({
   email: z

@@ -51,11 +51,17 @@ const normalizeFieldName = (fieldName: string) =>
   fieldName.replace(/^body\./, "");
 
 const getPayload = (error: unknown): ApiErrorPayload | undefined => {
-  if (!axios.isAxiosError(error) || !isRecord(error.response?.data)) {
+  if (!isRecord(error)) {
     return undefined;
   }
 
-  return error.response.data as ApiErrorPayload;
+  const response = error.response;
+
+  if (!isRecord(response) || !isRecord(response.data)) {
+    return undefined;
+  }
+
+  return response.data as ApiErrorPayload;
 };
 
 export const getApiErrorMessage = (
