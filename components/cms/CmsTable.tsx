@@ -44,7 +44,8 @@ export default function CmsTable({
 
     setOpenDelete(false);
      
-    // Refresh pages here
+      // Refresh pages here
+    await refresh();
   } catch (error: any) {
     console.error(error);
 

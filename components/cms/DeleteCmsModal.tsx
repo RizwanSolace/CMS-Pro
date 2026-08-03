@@ -3,8 +3,6 @@
 import Button from "@/components/common/Button";
 import Modal from "@/components/common/Modal";
 import { TriangleAlert } from "lucide-react";
-import toast from "react-hot-toast";
-import { cmsService } from "@/services/cms.service";
 
 
 interface DeleteCmsModalProps {
@@ -22,24 +20,7 @@ export default function DeleteCmsModal({
   onConfirm,
 }: DeleteCmsModalProps) {
   if (!page) return null;
-  const handleDelete = async (id: string) => {
-  if (!confirm("Are you sure you want to delete this page?")) return;
-
-  try {
-    await cmsService.deletePage(id);
-
-    toast.success("Page deleted successfully.");
-
-   // refresh(); // Fetch pages again
-  } catch (error: any) {
-    console.error(error);
-    console.log(error.response)
-
-    toast.error(
-      error?.response?.data?.message || "Failed to delete page."
-    );
-  }
-};
+  // Deletion is handled by parent via `onConfirm` so we just call that here.
 
   return (
     <Modal
@@ -60,8 +41,8 @@ export default function DeleteCmsModal({
 
         <div>
           <h3 className="text-xl font-semibold">
-            <button  onClick={() => handleDelete(page._id)}>
-            Delete "{page.title}"?
+            <button onClick={() => onConfirm()}>
+              Delete "{page.title}"?
             </button>
           </h3>
 
@@ -79,10 +60,7 @@ export default function DeleteCmsModal({
             Cancel
           </Button>
 
-          <Button
-            variant="danger"
-            onClick={onConfirm}
-          >
+          <Button variant="danger" onClick={onConfirm}>
             Delete Page
           </Button>
 

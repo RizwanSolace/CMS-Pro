@@ -12,6 +12,10 @@ export const authService = {
       payload
     );
 
+    if (data && data.success === false) {
+      throw { response: { data } };
+    }
+
     return data;
   },
   

@@ -43,6 +43,85 @@ export default function RegisterForm() {
     try {
     const payload = toSignupPayload(data);
     const response = await authService.register(payload);
+    // Some APIs return 200 with success: false and include validation errors.
+    if (response && (response as any).success === false) {
+      const resp = response as any;
+
+      const mapField = (fieldName: string | undefined) => {
+        if (!fieldName) return fieldName;
+        if (fieldName.startsWith("body.")) {
+          return fieldName.split(".").pop();
+        }
+        if (fieldName === "name") {
+          return "firstName";
+        }
+        return fieldName;
+      };
+
+      const setServerError = (fieldName: string, message: string) => {
+        const mappedField = mapField(fieldName) as any;
+
+        if (mappedField) {
+          setError(mappedField, {
+            type: "server",
+            message,
+          });
+          return true;
+        }
+
+        return false;
+      };
+
+      let handled = false;
+
+      if (Array.isArray(resp.errors)) {
+        resp.errors.forEach((item: any) => {
+          const fieldName = item.field || item.path || item.param;
+          const message = item.message || item.msg;
+
+          if (fieldName && message) {
+            handled = setServerError(fieldName, message) || handled;
+          }
+        });
+      } else if (resp.errors && typeof resp.errors === "object") {
+        Object.entries(resp.errors).forEach(([k, v]) => {
+          const fieldName = mapField(k);
+          const message = Array.isArray(v) ? v[0] : v;
+
+          if (typeof fieldName === "string" && typeof message === "string") {
+            setError(fieldName as any, {
+              type: "server",
+              message,
+            });
+            handled = true;
+          }
+        });
+      }
+
+      if (!handled && Array.isArray(resp.message)) {
+        resp.message.forEach((item: any) => {
+          if (item && typeof item === "object") {
+            const fieldName = item.field || item.path || item.param;
+            const message = item.message || item.msg;
+
+            if (fieldName && message) {
+              handled = setServerError(fieldName, message) || handled;
+            }
+          } else if (typeof item === "string") {
+            toast.error(item);
+            handled = true;
+          }
+        });
+      }
+
+      if (!handled) {
+        const msg = typeof resp.message === "string" ? resp.message : resp.error;
+        toast.error(msg || "Registration failed. Please try again.");
+      }
+
+      return;
+    }
+
     toast.success(response.message || "Account created successfully.");
 
     router.push(

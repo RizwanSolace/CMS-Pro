@@ -47,6 +47,9 @@ export const getApiSuccessMessage = (
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
 
+const normalizeFieldName = (fieldName: string) =>
+  fieldName.replace(/^body\./, "");
+
 const getPayload = (error: unknown): ApiErrorPayload | undefined => {
   if (!axios.isAxiosError(error) || !isRecord(error.response?.data)) {
     return undefined;
@@ -74,20 +77,21 @@ export const getApiValidationErrors = (error: unknown) => {
 
 export const getApiFieldError = (error: unknown, fieldName: string) => {
   const errors = getApiValidationErrors(error);
+  const normalizedField = normalizeFieldName(fieldName);
 
   if (Array.isArray(errors)) {
     const fieldError = errors.find(
       (item) =>
-        item.field === fieldName ||
-        item.path === fieldName ||
-        item.param === fieldName
+        normalizeFieldName(item.field || "") === normalizedField ||
+        normalizeFieldName(item.path || "") === normalizedField ||
+        normalizeFieldName(item.param || "") === normalizedField
     );
 
     return fieldError?.message || fieldError?.msg;
   }
 
   if (isRecord(errors)) {
-    const value = errors[fieldName];
+    const value = errors[normalizedField] ?? errors[fieldName];
     const message = Array.isArray(value) ? value[0] : value;
 
     return typeof message === "string" ? message : undefined;
@@ -106,7 +110,10 @@ export const applyApiValidationErrors = <TFieldValues extends FieldValues>(
 
   if (Array.isArray(errors)) {
     errors.forEach((item) => {
-      const fieldName = item.field || item.path || item.param;
+      const rawFieldName = item.field || item.path || item.param;
+      const fieldName = rawFieldName
+        ? normalizeFieldName(rawFieldName)
+        : rawFieldName;
       const message = item.message || item.msg;
 
       if (!fieldName || !message) return;
@@ -122,7 +129,8 @@ export const applyApiValidationErrors = <TFieldValues extends FieldValues>(
   }
 
   if (isRecord(errors)) {
-    Object.entries(errors).forEach(([fieldName, value]) => {
+    Object.entries(errors).forEach(([rawFieldName, value]) => {
+      const fieldName = normalizeFieldName(rawFieldName);
       const message = Array.isArray(value) ? value[0] : value;
 
       if (typeof message !== "string") return;
