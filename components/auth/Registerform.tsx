@@ -110,8 +110,15 @@ export default function RegisterForm() {
             label="First Name"
             placeholder="John"
             required
+            onInput={(e) => {
+    e.currentTarget.value = e.currentTarget.value.replace(/[^A-Za-z\s]/g, "");
+  }}
  {...register("firstName", {
-    required: "First Name is required",
+    required: "First Name is required.",
+    pattern: {
+      value: /^[A-Za-z\s]+$/,
+      message: "First Name can contain only letters.",
+    },
   })}
             error={errors.firstName?.message}
           />
@@ -121,8 +128,16 @@ export default function RegisterForm() {
             label="Last Name"
             placeholder="Doe"
             required
+            onInput={(e) => {
+    e.currentTarget.value = e.currentTarget.value.replace(/[^A-Za-z\s]/g, "");
+  }}
+
              {...register("lastName", {
-    required: "Last Name is required",
+    required: "Last Name is required.",
+    pattern: {
+      value: /^[A-Za-z\s]+$/,
+      message: "Last Name can contain only letters.",
+    },
   })}
             error={errors.lastName?.message}
           />
@@ -135,7 +150,7 @@ export default function RegisterForm() {
           placeholder="john@example.com"
           required
          {...register("email", {
-    required: "Email is required",
+    required: "Email is required.",
   })}
           error={errors.email?.message}
         />
@@ -145,16 +160,22 @@ export default function RegisterForm() {
           type="tel"
           label="Phone Number"
           placeholder="9876543210"
+           maxLength={10}
+            onInput={(e) => {
+    e.currentTarget.value = e.currentTarget.value
+      .replace(/\D/g, "")
+      .slice(0, 10);
+  }}
           required
           {...register("phone", {
-    required: "Phone number is required",
+    required: "Phone number is required.",
      pattern: {
       value: /^[6-9]\d{9}$/,
-      message: "Please enter a valid 10-digit Indian phone number",
+      message: "Please enter a valid 10-digit Indian phone number.",
     },
      validate: (value) =>
       isValidPhoneNumber(`+91${value}`)
-        || "Please enter a valid Indian phone number",
+        || "Please enter a valid Indian phone number.",
   } )}
   
           error={errors.phone?.message}
@@ -166,7 +187,7 @@ export default function RegisterForm() {
           placeholder="Enter your password"
           required
           {...register("password", {
-    required: "Password is required",
+    required: "Password is required.",
   })}
           error={errors.password?.message}
         />
@@ -181,7 +202,7 @@ export default function RegisterForm() {
           placeholder="Confirm your password"
           required
           {...register("confirmPassword", {
-    required: "Please confirm your password",
+    required: "Please confirm your password.",
   })}
           error={errors.confirmPassword?.message}
         />
