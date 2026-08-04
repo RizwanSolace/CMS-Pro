@@ -53,6 +53,22 @@ export default function RegisterForm() {
       const hadFieldErrors = applyApiValidationErrors(error, setError, {
         name: "firstName",
       });
+       const message = getApiErrorMessage(error);
+
+  if (message === "Email already exists.") {
+    setError("email", {
+      type: "server",
+      message,
+    });
+  }
+  if (message === "Phone number already exists.") {
+  setError("phone", {
+    type: "server",
+    message,
+  });
+}
+   toast.error(message);
+
 
       const apiErrors = getApiValidationErrors(error);
       if (Array.isArray(apiErrors)) {
