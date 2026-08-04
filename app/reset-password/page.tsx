@@ -4,7 +4,7 @@ export default function ResetPasswordPage() {
 
   return(
     <AuthLayout>
-   <ResetPasswordForm />;
+   <ResetPasswordForm />
    </AuthLayout>
   )
 }
