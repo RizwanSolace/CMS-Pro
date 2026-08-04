@@ -6,6 +6,8 @@ import { useForm } from "react-hook-form";
 import Input from "@/components/common/Input";
 import PasswordInput from "@/components/common/PasswordInput";
 import Button from "@/components/common/Button";
+
+import { isValidPhoneNumber } from "libphonenumber-js";
 import {
   applyApiValidationErrors,
   getApiErrorMessage,
@@ -130,7 +132,15 @@ export default function RegisterForm() {
           required
           {...register("phone", {
     required: "Phone number is required",
+     pattern: {
+      value: /^[6-9]\d{9}$/,
+      message: "Please enter a valid 10-digit Indian phone number",
+    },
+     validate: (value) =>
+      isValidPhoneNumber(`+91${value}`)
+        || "Please enter a valid Indian phone number",
   } )}
+  
           error={errors.phone?.message}
         />
 

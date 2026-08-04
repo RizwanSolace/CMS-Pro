@@ -10,14 +10,18 @@ export const registerSchema = z.object({
 });
 
 export type RegisterFormData = z.infer<typeof registerSchema>;
+
 export const loginSchema = z.object({
   email: z
     .string()
-    .email("Please enter a valid email"),
+    .trim()
+    .min(1, "Email is required")
+    .email("Please enter a valid email address"),
 
   password: z
     .string()
-    .min(8, "Password is required"),
+    .min(1, "Password is required"),
+    
 });
 
 export type LoginFormData = z.infer<typeof loginSchema>;
