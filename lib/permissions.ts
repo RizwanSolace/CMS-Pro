@@ -84,7 +84,8 @@ export function getUserFromLocalStorage() {
     const parsed = JSON.parse(raw);
 
     if (parsed && typeof parsed.role === "string") {
-      parsed.role = normalizeRole(parsed.role);
+        // keep original role for display, store normalized role separately
+        parsed.normalizedRole = normalizeRole(parsed.role);
     }
 
     return parsed;

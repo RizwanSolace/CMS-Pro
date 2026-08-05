@@ -24,7 +24,7 @@ const menus = [
     title: "Dashboard",
     href: "/dashboard",
     icon: LayoutDashboard,
-    roles: ["SUPER_ADMIN", "ADMIN", "EDITOR"],
+    roles: ["SUPER_ADMIN", "ADMIN", "EDITOR","USER"],
   },
   {
     title: "Users",
@@ -54,13 +54,13 @@ const menus = [
     title: "Settings",
     href: "/dashboard/settings",
     icon: Settings,
-    roles: ["SUPER_ADMIN","ADMIN","EDITOR"],
+    roles: ["SUPER_ADMIN","ADMIN","EDITOR","USER"],
   },
   {
     title: "Profile",
     href: "/dashboard/profile",
     icon: User,
-    roles: ["SUPER_ADMIN", "ADMIN", "EDITOR"],
+    roles: ["SUPER_ADMIN", "ADMIN", "EDITOR","USER"],
   },
   {
 title: "Admin Requests",
@@ -73,11 +73,14 @@ title: "Admin Requests",
 export default function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
-  const { role } = useAuth();
+  const { role, normalizedRole } = useAuth() as any;
 
   const visibleMenus = menus.filter((m) => {
     if (!m.roles) return true;
-    return role ? m.roles.includes(role) : false;
+    // use original `role` for menu visibility (so displayed role controls UI),
+    // fall back to `normalizedRole` when original role is not present.
+    const checkRole = role ?? normalizedRole;
+    return checkRole ? m.roles.includes(checkRole) : false;
   });
 
 const handleLogout = () => {
@@ -95,7 +98,7 @@ const handleLogout = () => {
         </h2>
 
         <p className="mt-1 text-sm text-slate-500">
-          {role} Panel
+          {role ?? normalizedRole} Panel
         </p>
       </div>
 

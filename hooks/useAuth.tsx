@@ -23,6 +23,9 @@ export default function useAuth() {
 
   return {
     user,
+    // `role` remains the original value (for display)
     role: user?.role as string | undefined,
+    // `normalizedRole` is used for permission checks
+    normalizedRole: (user as any)?.normalizedRole as string | undefined,
   };
 }

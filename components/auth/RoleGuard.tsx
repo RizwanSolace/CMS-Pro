@@ -17,7 +17,7 @@ export default function RoleGuard({
   requiredPermission,
 }: RoleGuardProps) {
   const router = useRouter();
-  const { role, user } = useAuth() as any;
+  const { role, normalizedRole, user } = useAuth() as any;
 
   useEffect(() => {
     // wait until user is loaded
@@ -32,14 +32,16 @@ export default function RoleGuard({
 
     // If allowedRoles provided, enforce
     if (allowedRoles && allowedRoles.length > 0) {
-      if (!hasAnyRole(role, allowedRoles as any)) {
+      const checkRole = normalizedRole ?? role;
+      if (!hasAnyRole(checkRole, allowedRoles as any)) {
         router.replace("/unauthorized");
         return;
       }
     }
 
     if (requiredPermission) {
-      if (!hasPermission(role, requiredPermission)) {
+      const checkRole = normalizedRole ?? role;
+      if (!hasPermission(checkRole, requiredPermission)) {
         router.replace("/unauthorized");
         return;
       }
@@ -54,11 +56,12 @@ export default function RoleGuard({
   if (!token) return null;
 
   // basic client-side guard; redirection handled in effect
-  if (allowedRoles && allowedRoles.length > 0 && !hasAnyRole(role, allowedRoles as any)) {
+  const checkRole = normalizedRole ?? role;
+  if (allowedRoles && allowedRoles.length > 0 && !hasAnyRole(checkRole, allowedRoles as any)) {
     return null;
   }
 
-  if (requiredPermission && !hasPermission(role, requiredPermission)) return null;
+  if (requiredPermission && !hasPermission(checkRole, requiredPermission)) return null;
 
   return <>{children}</>;
 }

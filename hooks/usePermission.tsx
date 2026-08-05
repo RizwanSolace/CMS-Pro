@@ -6,12 +6,16 @@ import { hasPermission, hasAnyRole } from "@/lib/permissions";
 export default function usePermission() {
   const { role } = useAuth();
 
+  const { normalizedRole } = useAuth() as any;
+
   function can(permission: string) {
-    return hasPermission(role, permission);
+    const checkRole = normalizedRole ?? role;
+    return hasPermission(checkRole, permission);
   }
 
   function isInRole(roles: Array<string>) {
-    return hasAnyRole(role, roles as any);
+    const checkRole = normalizedRole ?? role;
+    return hasAnyRole(checkRole, roles as any);
   }
 
   return {
