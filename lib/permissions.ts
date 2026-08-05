@@ -1,9 +1,10 @@
-export type Role = "SUPER_ADMIN" | "ADMIN" | "EDITOR";
+export type Role = "SUPER_ADMIN" | "ADMIN" | "EDITOR"|"USER";
 
 export const Roles = {
   SUPER_ADMIN: "SUPER_ADMIN",
   ADMIN: "ADMIN",
   EDITOR: "EDITOR",
+  USER: "USER",
 } as const;
 
 // Permission keys are descriptive and scalable for later enhancements
@@ -39,6 +40,15 @@ export const rolePermissions: Record<Role, string[]> = {
     "profile",
     "changePassword",
   ],
+  USER : [
+    "dashboard",
+    "cms:create",
+    "cms:edit:own",
+    "builder",
+    "profile",
+    "changePassword",
+  ],
+
 };
 
 export function hasPermission(
@@ -86,14 +96,15 @@ export function getUserFromLocalStorage() {
 function normalizeRole(role: string | undefined | null) {
   if (!role) return role;
   const normalized = role
+    .toString()
     .trim()
     .replace(/\s+/g, "_")
     .toUpperCase();
 
+  // map legacy/simple USER role to EDITOR permissions
   if (normalized === "USER") {
     return "EDITOR";
   }
 
-
-  return role.toString().trim().replace(/\s+/g, "_").toUpperCase();
+  return normalized;
 }

@@ -154,10 +154,22 @@ export default function CmsForm({ mode, initialData, onSubmit }: CmsFormProps) {
     }
 
     setErrors(newErrors);
-
     if (Object.keys(newErrors).length > 0) {
-      const firstError = Object.values(newErrors)[0];
-      toast.error(firstError, {
+      const firstField = Object.keys(newErrors)[0];
+      // try to focus and scroll to the first invalid field
+      try {
+        const el = document.getElementById(firstField) as HTMLElement | null;
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth", block: "center" });
+          // small timeout to ensure scroll completes before focusing
+          setTimeout(() => el.focus(), 200);
+        }
+      } catch (e) {
+        // ignore DOM errors
+      }
+
+      // show unified toast message for missing mandatory fields
+      toast.error("Complete all mandatory field", {
         position: "top-right",
         autoClose: 5000,
         hideProgressBar: false,
