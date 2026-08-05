@@ -30,7 +30,7 @@ export interface CreateCmsPagePayload {
       keywords: string;
     };
   };
-  featuredImage: string | { url: string; originalName?: string; _id?: string; id?: string };
+  featuredImage?: string | { url: string; originalName?: string; _id?: string; id?: string };
 }
 
 export interface CmsPage {

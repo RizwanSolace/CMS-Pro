@@ -1,11 +1,13 @@
 "use client";
 import { useRef, useState, type ChangeEvent, type FormEvent } from "react";
+import { toast } from "react-toastify";
 import Input from "@/components/common/Input";
 import Button from "@/components/common/Button";
 import { cmsService } from "@/services/cms.service";
 import type { CmsPage } from "@/types/cms";
 import { ImagePlus, Images } from "lucide-react";
 import ChooseMediaModal from "./ChooseMediaModal";
+import { getApiFieldError, getApiErrorMessage } from "@/lib/api-response";
 
 interface CmsFormProps {
   mode: "add" | "edit";
@@ -118,12 +120,55 @@ export default function CmsForm({ mode, initialData, onSubmit }: CmsFormProps) {
     seoDescription: initialData?.content?.seo?.description ?? "",
     seoKeywords: initialData?.content?.seo?.keywords ?? "",
   });
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const handleInputChange =
     (field: keyof typeof formValues) =>
     (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      setFormValues((prev) => ({ ...prev, [field]: event.target.value }));
+      const value = event.target.value;
+      setFormValues((prev) => ({ ...prev, [field]: value }));
+      setErrors((prev) => ({ ...prev, [field]: "" }));
     };
+
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {};
+
+    if (!formValues.title.trim()) {
+      newErrors.title = "Title is required.";
+    }
+
+    if (!formValues.slug.trim()) {
+      newErrors.slug = "Slug is required.";
+    }
+
+    if (!formValues.description.trim()) {
+      newErrors.description = "Short description is required.";
+    }
+
+    if (!formValues.heroTitle.trim()) {
+      newErrors.heroTitle = "Hero title is required.";
+    }
+
+    if (!formValues.heroSubtitle.trim()) {
+      newErrors.heroSubtitle = "Hero subtitle is required.";
+    }
+
+    setErrors(newErrors);
+
+    if (Object.keys(newErrors).length > 0) {
+      const firstError = Object.values(newErrors)[0];
+      toast.error(firstError, {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+    }
+
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleImageUpload = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -183,6 +228,10 @@ export default function CmsForm({ mode, initialData, onSubmit }: CmsFormProps) {
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
+    if (!validateForm()) {
+      return;
+    }
+
     const formData: CmsFormData = {
       title: formValues.title,
       slug: formValues.slug.trim().replace(/^\/+|\/+$/g, ""),
@@ -219,11 +268,33 @@ export default function CmsForm({ mode, initialData, onSubmit }: CmsFormProps) {
       status: mode === "add" ? "Draft" : initialData?.status ?? "Draft",
     };
 
-    await onSubmit?.(formData);
+    try {
+      await onSubmit?.(formData);
+    } catch (err) {
+      // apply server-side validation errors where possible
+      const slugError = getApiFieldError(err, "slug");
+      const descriptionError = getApiFieldError(err, "description");
+
+      const newErrors: Record<string, string> = {};
+
+      if (slugError) newErrors.slug = slugError;
+      if (descriptionError) newErrors.description = descriptionError;
+
+      if (Object.keys(newErrors).length) {
+        setErrors((prev) => ({ ...prev, ...newErrors }));
+        // show first server error as toast as well
+        toast.error(Object.values(newErrors)[0] as string);
+        return;
+      }
+
+      // generic error toast
+      toast.error(getApiErrorMessage(err));
+      throw err;
+    }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} noValidate className="space-y-6">
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
         <h3 className="mb-4 text-lg font-semibold text-slate-800">Page Information</h3>
         <div className="grid gap-4 md:grid-cols-2">
@@ -234,6 +305,7 @@ export default function CmsForm({ mode, initialData, onSubmit }: CmsFormProps) {
             onChange={handleInputChange("title")}
             placeholder="Enter page title"
             required
+            error={errors.title}
           />
 
           <Input
@@ -243,20 +315,28 @@ export default function CmsForm({ mode, initialData, onSubmit }: CmsFormProps) {
             onChange={handleInputChange("slug")}
             placeholder="about-us"
             required
+            error={errors.slug}
           />
         </div>
 
         <div className="mt-4">
-          <label className="mb-2 block text-sm font-medium text-slate-700">Short Description</label>
+          <label className="mb-2 block text-sm font-medium text-slate-700" htmlFor="description">
+            Short Description
+            <span className="ml-1 text-red-500">*</span>
+          </label>
           <textarea
+            id="description"
             rows={3}
-            className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-blue-600"
+            className={`w-full rounded-xl border px-4 py-3 outline-none transition ${errors.description ? "border-red-500 focus:border-red-500" : "border-slate-300 focus:border-blue-600"}`}
             placeholder="Enter short description"
             value={formValues.description}
             onChange={handleInputChange("description")}
             name="description"
             required
           />
+          {errors.description && (
+            <p className="mt-1 text-sm text-red-500">{errors.description}</p>
+          )}
         </div>
       </section>
 
@@ -270,6 +350,7 @@ export default function CmsForm({ mode, initialData, onSubmit }: CmsFormProps) {
             onChange={handleInputChange("heroTitle")}
             placeholder="Welcome to Our Company"
             required
+            error={errors.heroTitle}
           />
 
           <Input
@@ -279,6 +360,7 @@ export default function CmsForm({ mode, initialData, onSubmit }: CmsFormProps) {
             onChange={handleInputChange("heroSubtitle")}
             placeholder="We build innovative solutions."
             required
+            error={errors.heroSubtitle}
           />
         </div>
 

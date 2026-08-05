@@ -60,7 +60,7 @@ export default function EditCmsModal({
         slug: data.slug.trim().replace(/^\/+|\/+$/g, ""),
         description: data.description,
         content: data.content,
-        featuredImage: data.featuredImage,
+        ...(data.featuredImage ? { featuredImage: data.featuredImage } : {}),
       };
 
       await cmsService.update(page._id, payload);
@@ -69,6 +69,8 @@ export default function EditCmsModal({
       onClose();
     } catch (error) {
       console.error(error);
+      // rethrow so CmsForm can show validation errors from the backend
+      throw error;
     }
   };
 

@@ -54,7 +54,7 @@ export default function AddCmsModal() {
         slug: data.slug.trim().replace(/^\/+|\/+$/g, ""),
         description: data.description,
         content: data.content,
-        featuredImage: data.featuredImage,
+        ...(data.featuredImage ? { featuredImage: data.featuredImage } : {}),
       };
 
       const res = await cmsService.create(payload);
@@ -64,6 +64,8 @@ export default function AddCmsModal() {
       setOpen(false);
     } catch (err) {
       console.error(err);
+      // rethrow so form can surface validation errors to the user
+      throw err;
     }
   };
 
