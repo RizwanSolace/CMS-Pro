@@ -4,12 +4,17 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { cmsService } from "@/services/cms.service";
 import toast from "react-hot-toast";
+import usePermission from "@/hooks/usePermission";
 
 export default function PreviewPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const [page, setPage] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const { role, normalizedRole, can } = usePermission();
+
+  const checkRole = normalizedRole ?? role;
+  const canPublish = can("cms:crud") || checkRole === "ADMIN" || checkRole === "SUPER_ADMIN";
 
   useEffect(() => {
     async function fetchPage() {
@@ -99,14 +104,18 @@ export default function PreviewPage() {
                 Save Draft
               </button>
 
-              <button onClick={handlePublish} className="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700">
-                Publish
-              </button>
+              {canPublish && (
+                <button onClick={handlePublish} className="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700">
+                  Publish
+                </button>
+              )}
             </>
           ) : (
-            <button onClick={handleUnpublish} className="rounded-lg bg-red-600 px-4 py-2 text-white hover:bg-red-700">
-              Unpublish
-            </button>
+            canPublish ? (
+              <button onClick={handleUnpublish} className="rounded-lg bg-red-600 px-4 py-2 text-white hover:bg-red-700">
+                Unpublish
+              </button>
+            ) : null
           )}
         </div>
       </div>

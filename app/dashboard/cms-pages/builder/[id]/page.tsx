@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { DndContext } from "@dnd-kit/core";
+import usePermission from "@/hooks/usePermission";
 
 import BuilderSidebar from "@/components/cms-builder/BuilderSidebar";
 import BuilderCanvas from "@/components/cms-builder/BuilderCanvas";
@@ -29,6 +30,9 @@ const params = useParams();
 const pageId = params.id;
     const [selectedBlock, setSelectedBlock] =
         useState<BuilderBlock | null>(null);
+    const { role, normalizedRole, can } = usePermission();
+    const checkRole = normalizedRole ?? role;
+    const canPublish = can("cms:crud") || checkRole === "ADMIN" || checkRole === "SUPER_ADMIN";
         const deleteBlock = (id: string) => {
   setBlocks((prev) => prev.filter((block) => block.id !== id));
 
@@ -170,9 +174,11 @@ const moveBlock = (
             Save Draft
         </Button>
 
-        <Button>
+        {canPublish && (
+          <Button>
             Publish
-        </Button>
+          </Button>
+        )}
     </div>
 </div>
         <DndContext onDragEnd={handleDragEnd}>

@@ -8,6 +8,7 @@ import type { CmsPage } from "@/types/cms";
 import { ImagePlus, Images } from "lucide-react";
 import ChooseMediaModal from "./ChooseMediaModal";
 import { getApiFieldError, getApiErrorMessage } from "@/lib/api-response";
+import usePermission from "@/hooks/usePermission";
 
 interface CmsFormProps {
   mode: "add" | "edit";
@@ -121,6 +122,9 @@ export default function CmsForm({ mode, initialData, onSubmit }: CmsFormProps) {
     seoKeywords: initialData?.content?.seo?.keywords ?? "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const { role, normalizedRole, can } = usePermission();
+  const checkRole = (normalizedRole ?? role) as string | undefined;
+  const canPublish = can("cms:crud") || checkRole === "ADMIN" || checkRole === "SUPER_ADMIN";
 
   const handleInputChange =
     (field: keyof typeof formValues) =>
@@ -615,7 +619,7 @@ export default function CmsForm({ mode, initialData, onSubmit }: CmsFormProps) {
             defaultValue={initialData?.status ?? "Draft"}
           >
             <option>Draft</option>
-            <option>Published</option>
+            {canPublish && <option>Published</option>}
           </select>
         )}
       </div>
