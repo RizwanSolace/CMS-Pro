@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { cmsService } from "@/services/cms.service";
-import toast from "react-hot-toast";
+import { toast } from "react-toastify";
 import usePermission from "@/hooks/usePermission";
 
 export default function PreviewPage() {
