@@ -20,6 +20,7 @@ export default function usePermission() {
 
   return {
     role,
+    normalizedRole,
     can,
     isInRole,
   };

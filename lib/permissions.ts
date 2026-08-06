@@ -40,12 +40,10 @@ export const rolePermissions: Record<Role, string[]> = {
     "profile",
     "changePassword",
   ],
-  USER : [
+  USER: [
     "dashboard",
-    "cms:create",
-    "cms:edit:own",
-    "builder",
     "profile",
+    "settings",
     "changePassword",
   ],
 
@@ -101,11 +99,6 @@ function normalizeRole(role: string | undefined | null) {
     .trim()
     .replace(/\s+/g, "_")
     .toUpperCase();
-
-  // map legacy/simple USER role to EDITOR permissions
-  if (normalized === "USER") {
-    return "EDITOR";
-  }
 
   return normalized;
 }

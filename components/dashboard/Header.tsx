@@ -6,6 +6,7 @@ import {
   Bell,
   ChevronDown,
   LogOut,
+  Menu,
   Settings,
   Sparkles,
   User,
@@ -23,7 +24,11 @@ const pageTitles: Array<{ match: string; title: string }> = [
   { match: "/dashboard/admin-requests", title: "Admin Requests" },
 ];
 
-export default function Header() {
+interface HeaderProps {
+  onToggleSidebar?: () => void;
+}
+
+export default function Header({ onToggleSidebar }: HeaderProps) {
   const { profile, loading } = useProfile();
   const router = useRouter();
   const pathname = usePathname();
@@ -61,13 +66,24 @@ export default function Header() {
 
   return (
     <header className="flex min-h-20 items-center justify-between gap-5 border-b border-slate-200 bg-white px-6 py-3">
-      <div className="min-w-0">
-        <h1 className="truncate text-2xl font-bold tracking-tight text-slate-950">
-          {pageTitle}
-        </h1>
-        <p className="mt-1 truncate text-sm text-slate-500">
-          Welcome back{profile?.name ? `, ${profile.name.split(" ")[0]}` : ""}
-        </p>
+      <div className="flex items-center gap-3">
+        <button
+          type="button"
+          onClick={onToggleSidebar}
+          className="inline-flex h-12 w-12 items-center justify-center rounded-xl border border-slate-200 text-slate-600 transition hover:bg-slate-50 md:hidden"
+          aria-label="Open sidebar"
+        >
+          <Menu size={20} />
+        </button>
+
+        <div className="min-w-0">
+          <h1 className="truncate text-2xl font-bold tracking-tight text-slate-950">
+            {pageTitle}
+          </h1>
+          <p className="mt-1 truncate text-sm text-slate-500">
+            Welcome back{profile?.name ? `, ${profile.name.split(" ")[0]}` : ""}
+          </p>
+        </div>
       </div>
 
       <div className="flex flex-1 flex-wrap items-center justify-end gap-3">

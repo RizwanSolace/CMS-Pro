@@ -172,7 +172,7 @@ onChange={(e) =>
           
             <option value="ADMIN">Admin</option>
             <option value="EDITOR">Editor</option>
-            <option value="USER">User</option>
+           
           </select>
         </div>
 

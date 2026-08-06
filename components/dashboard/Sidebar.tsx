@@ -11,13 +11,17 @@ import {
   User,
   LogOut,
   ShieldCheck,
-  Image
+  Image,
+  X,
 } from "lucide-react";
 import clsx from "clsx";
 import { useRouter } from "next/navigation";
 import useAuth from "@/hooks/useAuth";
 
-
+interface SidebarProps {
+  mobileOpen?: boolean;
+  onClose?: () => void;
+}
 
 const menus = [
   {
@@ -77,10 +81,11 @@ export default function Sidebar() {
 
   const visibleMenus = menus.filter((m) => {
     if (!m.roles) return true;
-    // use original `role` for menu visibility (so displayed role controls UI),
-    // fall back to `normalizedRole` when original role is not present.
-    const checkRole = role ?? normalizedRole;
-    return checkRole ? m.roles.includes(checkRole) : false;
+
+    const hasOriginalRole = role ? m.roles.includes(role) : false;
+    const hasNormalizedRole = normalizedRole ? m.roles.includes(normalizedRole) : false;
+
+    return hasOriginalRole || hasNormalizedRole;
   });
 
 const handleLogout = () => {

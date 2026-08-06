@@ -25,15 +25,16 @@ import { CmsPage } from "@/types/cms";
 export default function DashboardPage() {
   const { pages } = useCmsPages();
   const { stats, loading } = useDashboard();
-  const { role, can } = usePermission();
+  const { role, normalizedRole, can } = usePermission();
 
-  const normalizedRole = role ?? "EDITOR";
+  const effectiveRole = normalizedRole ?? role ?? "EDITOR";
   const canManageUsers =
     can("users:view") || can("users:update") || can("users:crud");
   const canManageRoles = can("roles:crud");
   const canManageCms =
     can("cms:crud") || can("cms:create") || can("cms:edit:own");
   const canApproveAdmins = can("approveAdmin");
+  const isBasicUser = (normalizedRole ?? role) === "USER";
 
   const cards = [
     canManageUsers && {
@@ -63,7 +64,7 @@ export default function DashboardPage() {
       icon: UserPlus,
       color: "bg-purple-600",
     },
-    normalizedRole === "EDITOR" && {
+    (effectiveRole === "EDITOR" || effectiveRole === "USER") && {
       title: "My Workspace",
       value: "CMS",
       icon: Edit3,
@@ -81,11 +82,11 @@ export default function DashboardPage() {
       href: "/dashboard/cms-pages",
       icon: Edit3,
       title:
-        normalizedRole === "EDITOR"
+        effectiveRole === "EDITOR" || effectiveRole === "USER"
           ? "Create or update content"
           : "Manage CMS pages",
       description:
-        normalizedRole === "EDITOR"
+        effectiveRole === "EDITOR" || effectiveRole === "USER"
           ? "Work on drafts and keep assigned pages fresh."
           : "Review drafts, publish pages, and maintain content.",
     },
@@ -144,6 +145,51 @@ export default function DashboardPage() {
     return (
       <div className="flex justify-center py-20 text-slate-600">
         Loading Dashboard...
+      </div>
+    );
+  }
+
+  if (isBasicUser) {
+    return (
+      <div className="space-y-8">
+        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="mb-6">
+            <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1 text-sm font-medium text-blue-700">
+              <Sparkles size={16} />
+              User workspace
+            </div>
+
+            <h2 className="text-2xl font-bold text-slate-900">
+              Welcome to your dashboard
+            </h2>
+
+            <p className="mt-2 max-w-2xl text-slate-500">
+              You have access only to your profile and account settings.
+            </p>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Link
+              href="/dashboard/profile"
+              className="rounded-2xl border border-slate-200 bg-white p-6 text-left shadow-sm transition hover:border-blue-500"
+            >
+              <p className="text-sm font-semibold text-slate-900">Profile</p>
+              <p className="mt-2 text-sm text-slate-500">
+                Manage your account details and password.
+              </p>
+            </Link>
+
+            <Link
+              href="/dashboard/settings"
+              className="rounded-2xl border border-slate-200 bg-white p-6 text-left shadow-sm transition hover:border-blue-500"
+            >
+              <p className="text-sm font-semibold text-slate-900">Settings</p>
+              <p className="mt-2 text-sm text-slate-500">
+                Update preferences and view account settings.
+              </p>
+            </Link>
+          </div>
+        </div>
       </div>
     );
   }

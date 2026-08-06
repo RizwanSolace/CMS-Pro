@@ -1,4 +1,6 @@
-import { ReactNode } from "react";
+"use client";
+
+import { ReactNode, useState } from "react";
 import Sidebar from "./Sidebar";
 import Header from "./Header";
 import useDashboard from "@/hooks/useDashboard";
