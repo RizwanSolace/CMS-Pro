@@ -42,14 +42,8 @@ update: async (
   id: string,
   payload: CreateCmsPagePayload
 ) => {
-   try {
-    const { data } = await api.post("/cmsPages/cms", payload);
-    return data;
-  } catch (error: any) {
-    console.log("Response:", error.response?.data);
-    console.log("Payload:", payload);
-    throw error;
-  }
+  const { data } = await api.patch(`/cmsPages/cms/${id}`, payload);
+  return data;
 },
 updateStatus: async (
   id: string,

@@ -4,6 +4,7 @@ import Table from "@/components/common/table/Table";
 import TableHead from "@/components/common/table/TableHead";
 import TableBody from "@/components/common/table/Tablebody";
 import toast from "react-hot-toast";
+import axios from "axios";
 import { cmsService } from "@/services/cms.service";
 
 import { CmsPage } from "@/types/cms";
@@ -16,6 +17,8 @@ import CmsStatusBadge from "./CmsStatusBadge";
 import { useState} from 'react'
 import CmsActionMenu from "./CmsActionMenu";
 import { useRouter } from "next/navigation";
+import useAuth from "@/hooks/useAuth";
+import usePermission from "@/hooks/usePermission";
 
 
 
@@ -34,6 +37,24 @@ export default function CmsTable({
  const [openEdit, setOpenEdit] = useState(false);
  const [openDelete, setOpenDelete] = useState(false);
   const router = useRouter();
+  const { user } = useAuth();
+  const { can } = usePermission();
+  const canEditAllPages = can("cms:crud");
+  const canEditOwnPages = can("cms:edit:own");
+
+  const canManagePage = (page: CmsPage) => {
+    if (canEditAllPages) return true;
+    if (!canEditOwnPages) return false;
+
+    const userId = user?.id ?? user?._id;
+    const ownerId =
+      typeof page.createdBy === "string"
+        ? page.createdBy
+        : page.createdBy?._id;
+
+    return Boolean(userId && ownerId && userId === ownerId);
+  };
+
  const handleDelete = async () => {
   if (!selectedPage) return;
 
@@ -46,11 +67,11 @@ export default function CmsTable({
      
       // Refresh pages here
     await refresh();
-  } catch (error: any) {
+  } catch (error) {
     console.error(error);
 
     toast.error(
-      error?.response?.data?.message ||
+      getErrorMessage(error) ||
       "Failed to delete page."
     );
   }
@@ -117,7 +138,7 @@ export default function CmsTable({
               />
             </td>
 
-            <td>{page.createdBy?.name ?? "Unknown"}</td>
+            <td>{getAuthorName(page)}</td>
 
             <td>{formatDate(page.updatedAt)}</td>
 
@@ -126,15 +147,15 @@ export default function CmsTable({
   onView={() => {
     handleView(page._id);
   }}
-  onEdit={() => {
+  onEdit={canManagePage(page) ? () => {
     setSelectedPage(page);
     setOpenEdit(true);
-  }}
-  onDelete={() => {
+  } : undefined}
+  onDelete={canManagePage(page) ? () => {
     setSelectedPage(page);
     setOpenDelete(true);
     
-  }}
+  } : undefined}
    onPreview={() =>
         router.push(`/dashboard/cms-pages/preview/${page._id}`)
     }
@@ -168,4 +189,17 @@ export default function CmsTable({
 </>
     
   );
+}
+
+function getAuthorName(page: CmsPage) {
+  return typeof page.createdBy === "string"
+    ? "Unknown"
+    : page.createdBy?.name ?? "Unknown";
+}
+
+function getErrorMessage(error: unknown) {
+  if (!axios.isAxiosError(error)) return undefined;
+
+  const message = error.response?.data?.message;
+  return typeof message === "string" ? message : undefined;
 }

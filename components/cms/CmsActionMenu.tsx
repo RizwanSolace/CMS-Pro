@@ -12,8 +12,8 @@ import {
 
 interface UserActionMenuProps {
   onView: () => void;
-  onEdit: () => void;
-  onDelete: () => void;
+  onEdit?: () => void;
+  onDelete?: () => void;
   onPreview: () => void;
 }
 
@@ -121,15 +121,19 @@ export default function CmsActionMenu( { onView, onEdit, onDelete ,onPreview,}: 
               View
             </button>
 
-            <button className="flex w-full items-center gap-3 px-4 py-2 hover:bg-slate-100" onClick={() => handleAction(onEdit)} >
-              <Pencil size={16} />
-              Edit
-            </button>
+            {onEdit && (
+              <button className="flex w-full items-center gap-3 px-4 py-2 hover:bg-slate-100" onClick={() => handleAction(onEdit)} >
+                <Pencil size={16} />
+                Edit
+              </button>
+            )}
 
-            <button className="flex w-full items-center gap-3 px-4 py-2 text-red-600 hover:bg-red-50" onClick={() => handleAction(onDelete)}>
-              <Trash2 size={16} />
-              Delete
-            </button>
+            {onDelete && (
+              <button className="flex w-full items-center gap-3 px-4 py-2 text-red-600 hover:bg-red-50" onClick={() => handleAction(onDelete)}>
+                <Trash2 size={16} />
+                Delete
+              </button>
+            )}
           </div>,
           document.body
         )}

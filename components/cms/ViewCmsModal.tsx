@@ -43,7 +43,7 @@ export default function ViewCmsModal({
     { label: "Title", value: page.title },
     { label: "Slug", value: `/${page.slug}` },
     { label: "Status", value: page.status },
-    { label: "Author", value: page.createdBy?.name ?? "Unknown" },
+    { label: "Author", value: getAuthorName(page) },
     { label: "Created", value: formatDate(page.createdAt) },
     { label: "Updated", value: formatDate(page.updatedAt) },
   ];
@@ -141,6 +141,12 @@ export default function ViewCmsModal({
       </div>
     </Modal>
   );
+}
+
+function getAuthorName(page: CmsPage) {
+  return typeof page.createdBy === "string"
+    ? "Unknown"
+    : page.createdBy?.name ?? "Unknown";
 }
 
 function Field({

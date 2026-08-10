@@ -68,10 +68,12 @@ export interface CmsPage {
   };
   featuredImage: string | { url: string; originalName?: string; _id?: string; id?: string };
   status: "Draft" | "Published";
-  createdBy: {
-    _id: string;
-    name: string;
-  };
+  createdBy:
+    | string
+    | {
+        _id: string;
+        name: string;
+      };
   createdAt: string;
   updatedAt: string;
 }
