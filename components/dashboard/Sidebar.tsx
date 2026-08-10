@@ -58,7 +58,7 @@ const menus = [
     title: "Settings",
     href: "/dashboard/settings",
     icon: Settings,
-    roles: ["SUPER_ADMIN","ADMIN","EDITOR","USER"],
+    roles: ["SUPER_ADMIN","ADMIN"],
   },
   {
     title: "Profile",

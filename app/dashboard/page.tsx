@@ -27,7 +27,9 @@ export default function DashboardPage() {
   const { stats, loading } = useDashboard();
   const { role, normalizedRole, can } = usePermission();
 
-  const effectiveRole = normalizedRole ?? role ?? "EDITOR";
+  const effectiveRole = normalizedRole ?? role;
+  const isAdmin = effectiveRole === "ADMIN";
+  
   const canManageUsers =
     can("users:view") || can("users:update") || can("users:crud");
   const canManageRoles = can("roles:crud");
@@ -179,7 +181,7 @@ export default function DashboardPage() {
               </p>
             </Link>
 
-            <Link
+            {/* <Link
               href="/dashboard/settings"
               className="rounded-2xl border border-slate-200 bg-white p-6 text-left shadow-sm transition hover:border-blue-500"
             >
@@ -187,7 +189,7 @@ export default function DashboardPage() {
               <p className="mt-2 text-sm text-slate-500">
                 Update preferences and view account settings.
               </p>
-            </Link>
+            </Link> */}
           </div>
         </div>
       </div>

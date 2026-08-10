@@ -1,265 +1,664 @@
 "use client";
 
-import { useState } from "react";
-import { CheckCircle2, FileCheck2, ShieldCheck, Sparkles } from "lucide-react";
+import { useEffect, useState } from "react";
+import {
+  CheckCircle2,
+  Globe2,
+  Link2,
+  Search,
+  Settings2,
+  Share2,
+  ShieldCheck,
+} from "lucide-react";
 
 import Button from "@/components/common/Button";
 import Input from "@/components/common/Input";
+import { settingservice } from "@/services/settingservice";
 
 type SettingsState = {
   siteName: string;
-  tagline: string;
-  adminEmail: string;
-  contactPhone: string;
-  footerText: string;
-  timezone: string;
-  defaultPageStatus: "Draft" | "Published";
-  autoSave: boolean;
-  showTips: boolean;
+  siteTagline: string;
+  siteDescription: string;
+
+  contact: {
+    mapEmbedUrl: string;
+    email: string;
+    phone: string;
+    whatsapp: string;
+    address: string;
+  };
+
+  socialLinks: {
+    facebook: string;
+    instagram: string;
+    linkedin: string;
+    twitter: string;
+    youtube: string;
+    github: string;
+  };
+
+  seo: {
+    defaultMetaTitle: string;
+    defaultMetaDescription: string;
+    defaultOgImage: {
+      url: string;
+    };
+  };
+
+  footer: {
+    copyrightText: string;
+    privacyPolicyUrl: string;
+    termsAndConditionsUrl: string;
+  };
+
+  logo: {
+    url: string;
+  };
+
+  favicon: {
+    url: string;
+  };
 };
 
 const defaultSettings: SettingsState = {
-  siteName: "CMS Pro",
-  tagline: "Modern content management",
-  adminEmail: "admin@cmspro.com",
-  contactPhone: "+1 555 0123",
-  footerText: "A modern content experience for growing brands.",
-  timezone: "Asia/Delhi",
-  defaultPageStatus: "Draft",
-  autoSave: true,
-  showTips: true,
+  siteName: "",
+  siteTagline: "",
+  siteDescription: "",
+
+  contact: {
+    mapEmbedUrl: "",
+    email: "",
+    phone: "",
+    whatsapp: "",
+    address: "",
+  },
+
+  socialLinks: {
+    facebook: "",
+    instagram: "",
+    linkedin: "",
+    twitter: "",
+    youtube: "",
+    github: "",
+  },
+
+  seo: {
+    defaultMetaTitle: "",
+    defaultMetaDescription: "",
+    defaultOgImage: {
+      url: "",
+    },
+  },
+
+  footer: {
+    copyrightText: "",
+    privacyPolicyUrl: "",
+    termsAndConditionsUrl: "",
+  },
+
+  logo: {
+    url: "",
+  },
+
+  favicon: {
+    url: "",
+  },
 };
 
-const timezoneOptions = [
-  "UTC",
-  "Asia/Delhi",
-  "Asia/Dubai",
-  "Europe/London",
-  "America/New_York",
-];
-
-const normalizeSettings = (settings: Partial<SettingsState>): SettingsState => ({
-  ...defaultSettings,
-  ...settings,
-  defaultPageStatus: settings.defaultPageStatus ?? defaultSettings.defaultPageStatus,
-});
-
 export default function SettingsPage() {
-  const [settings, setSettings] = useState<SettingsState>(() => {
-    if (typeof window === "undefined") return defaultSettings;
+  const [settings, setSettings] =
+    useState<SettingsState>(defaultSettings);
 
-    const storedSettings = window.localStorage.getItem("cms-pro-settings");
-
-    if (!storedSettings) return defaultSettings;
-
-    try {
-      return normalizeSettings(JSON.parse(storedSettings));
-    } catch {
-      window.localStorage.removeItem("cms-pro-settings");
-      return defaultSettings;
-    }
-  });
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleSave = (event: React.FormEvent) => {
+  useEffect(() => {
+    const loadSettings = async () => {
+      try {
+        setLoading(true);
+        setError("");
+
+        const response = await settingservice.get();
+
+        console.log("Settings response:", response);
+
+        if (response?.success && response?.data) {
+          setSettings({
+            ...defaultSettings,
+            ...response.data,
+
+            contact: {
+              ...defaultSettings.contact,
+              ...response.data.contact,
+            },
+
+            socialLinks: {
+              ...defaultSettings.socialLinks,
+              ...response.data.socialLinks,
+            },
+
+            seo: {
+              ...defaultSettings.seo,
+              ...response.data.seo,
+              defaultOgImage: {
+                ...defaultSettings.seo.defaultOgImage,
+                ...response.data.seo?.defaultOgImage,
+              },
+            },
+
+            footer: {
+              ...defaultSettings.footer,
+              ...response.data.footer,
+            },
+
+            logo: {
+              ...defaultSettings.logo,
+              ...response.data.logo,
+            },
+
+            favicon: {
+              ...defaultSettings.favicon,
+              ...response.data.favicon,
+            },
+          });
+        }
+      } catch (err) {
+        console.error("Failed to load settings:", err);
+        setError("Failed to load settings.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadSettings();
+  }, []);
+
+  const handleSave = async (event: React.FormEvent) => {
     event.preventDefault();
 
-    window.localStorage.setItem("cms-pro-settings", JSON.stringify(settings));
-    setSaved(true);
+    try {
+      setSaving(true);
+      setSaved(false);
+      setError("");
 
-    window.setTimeout(() => setSaved(false), 2200);
+      await settingservice.update(settings);
+
+      setSaved(true);
+
+      window.setTimeout(() => {
+        setSaved(false);
+      }, 2500);
+    } catch (err) {
+      console.error("Failed to update settings:", err);
+      setError("Failed to save settings. Please try again.");
+    } finally {
+      setSaving(false);
+    }
   };
 
+  if (loading) {
+    return (
+      <div className="flex min-h-[400px] items-center justify-center">
+        <div className="text-sm text-slate-500">
+          Loading settings...
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
+
+      {/* Header */}
       <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1 text-sm font-medium text-blue-700">
-              <Sparkles size={16} />
-              Workspace preferences
+              <Settings2 size={16} />
+              CMS configuration
             </div>
 
-            <h1 className="text-3xl font-bold text-slate-900">Settings</h1>
-            <p className="mt-2 max-w-2xl text-slate-500">
-              Manage the defaults for your CMS workspace, publishing flow, and day-to-day editing.
+            <h1 className="text-3xl font-bold text-slate-900">
+              Settings
+            </h1>
+
+            <p className="mt-2 max-w-2xl text-sm text-slate-500">
+              Manage your website information, contact details,
+              social links, SEO and footer configuration.
             </p>
           </div>
 
-          <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
-            <p className="font-semibold text-slate-900">Current setup</p>
-            <p className="mt-1">{settings.siteName} / {settings.timezone}</p>
+          <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+            <p className="text-xs font-medium text-slate-500">
+              Current site
+            </p>
+
+            <p className="mt-1 font-semibold text-slate-900">
+              {settings.siteName || "CMS"}
+            </p>
           </div>
         </div>
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
-        <form
-          onSubmit={handleSave}
-          className="space-y-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
-        >
-          <section className="space-y-4">
+      <form onSubmit={handleSave} className="space-y-6">
+
+        {/* GENERAL */}
+        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="mb-5 flex items-center gap-3">
+            <Globe2 size={20} className="text-blue-600" />
+
             <div>
-              <h2 className="text-lg font-semibold text-slate-900">General</h2>
+              <h2 className="text-lg font-semibold text-slate-900">
+                General
+              </h2>
+
               <p className="text-sm text-slate-500">
-                Update the name and contact details that appear across the workspace.
+                Basic information about your website.
               </p>
             </div>
+          </div>
 
+          <div className="space-y-4">
             <Input
               label="Site name"
               value={settings.siteName}
-              onChange={(event) =>
-                setSettings((prev) => ({ ...prev, siteName: event.target.value }))
+              onChange={(e) =>
+                setSettings((prev) => ({
+                  ...prev,
+                  siteName: e.target.value,
+                }))
               }
             />
 
             <Input
               label="Tagline"
-              value={settings.tagline}
-              onChange={(event) =>
-                setSettings((prev) => ({ ...prev, tagline: event.target.value }))
-              }
-            />
-
-            <Input
-              label="Admin email"
-              type="email"
-              value={settings.adminEmail}
-              onChange={(event) =>
-                setSettings((prev) => ({ ...prev, adminEmail: event.target.value }))
-              }
-            />
-
-            <Input
-              label="Contact phone"
-              value={settings.contactPhone}
-              onChange={(event) =>
-                setSettings((prev) => ({ ...prev, contactPhone: event.target.value }))
+              value={settings.siteTagline}
+              onChange={(e) =>
+                setSettings((prev) => ({
+                  ...prev,
+                  siteTagline: e.target.value,
+                }))
               }
             />
 
             <label className="block">
-              <span className="mb-2 block text-sm font-medium text-gray-700">Footer text</span>
+              <span className="mb-2 block text-sm font-medium text-gray-700">
+                Site description
+              </span>
+
               <textarea
-                rows={3}
-                value={settings.footerText}
-                onChange={(event) =>
-                  setSettings((prev) => ({ ...prev, footerText: event.target.value }))
-                }
-                className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm text-slate-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-300"
-              />
-            </label>
-
-            <label className="block">
-              <span className="mb-2 block text-sm font-medium text-gray-700">Timezone</span>
-              <select
-                value={settings.timezone}
-                onChange={(event) =>
-                  setSettings((prev) => ({ ...prev, timezone: event.target.value }))
-                }
-                className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm text-slate-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-300"
-              >
-                {timezoneOptions.map((option) => (
-                  <option key={option} value={option}>
-                    {option}
-                  </option>
-                ))}
-              </select>
-            </label>
-          </section>
-
-          <section className="space-y-4">
-            <div>
-              <h2 className="flex items-center gap-2 text-lg font-semibold text-slate-900">
-                <FileCheck2 size={18} />
-                Publishing workflow
-              </h2>
-              <p className="text-sm text-slate-500">
-                Set sensible defaults for how pages move from draft to live content.
-              </p>
-            </div>
-
-            <label className="block">
-              <span className="mb-2 block text-sm font-medium text-gray-700">Default page status</span>
-              <select
-                value={settings.defaultPageStatus}
-                onChange={(event) =>
+                rows={4}
+                value={settings.siteDescription}
+                onChange={(e) =>
                   setSettings((prev) => ({
                     ...prev,
-                    defaultPageStatus: event.target.value as SettingsState["defaultPageStatus"],
+                    siteDescription: e.target.value,
                   }))
                 }
                 className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm text-slate-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-300"
-              >
-                <option value="Draft">Draft</option>
-                <option value="Published">Published</option>
-              </select>
-              <p className="mt-2 text-xs text-slate-500">
-                New CMS pages should start as drafts unless your team is ready to publish immediately.
+              />
+            </label>
+          </div>
+        </section>
+
+        {/* CONTACT */}
+        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="mb-5">
+            <h2 className="text-lg font-semibold text-slate-900">
+              Contact information
+            </h2>
+
+            <p className="text-sm text-slate-500">
+              Contact information displayed on your website.
+            </p>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            <Input
+              label="Email"
+              type="email"
+              value={settings.contact.email}
+              onChange={(e) =>
+                setSettings((prev) => ({
+                  ...prev,
+                  contact: {
+                    ...prev.contact,
+                    email: e.target.value,
+                  },
+                }))
+              }
+            />
+
+            <Input
+              label="Phone"
+              value={settings.contact.phone}
+              onChange={(e) =>
+                setSettings((prev) => ({
+                  ...prev,
+                  contact: {
+                    ...prev.contact,
+                    phone: e.target.value,
+                  },
+                }))
+              }
+            />
+
+            <Input
+              label="WhatsApp"
+              value={settings.contact.whatsapp}
+              onChange={(e) =>
+                setSettings((prev) => ({
+                  ...prev,
+                  contact: {
+                    ...prev.contact,
+                    whatsapp: e.target.value,
+                  },
+                }))
+              }
+            />
+
+            <Input
+              label="Address"
+              value={settings.contact.address}
+              onChange={(e) =>
+                setSettings((prev) => ({
+                  ...prev,
+                  contact: {
+                    ...prev.contact,
+                    address: e.target.value,
+                  },
+                }))
+              }
+            />
+          </div>
+
+          <div className="mt-4">
+            <Input
+              label="Map embed URL"
+              value={settings.contact.mapEmbedUrl}
+              onChange={(e) =>
+                setSettings((prev) => ({
+                  ...prev,
+                  contact: {
+                    ...prev.contact,
+                    mapEmbedUrl: e.target.value,
+                  },
+                }))
+              }
+            />
+          </div>
+        </section>
+
+        {/* SOCIAL LINKS */}
+        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="mb-5 flex items-center gap-3">
+            <Share2 size={20} className="text-blue-600" />
+
+            <div>
+              <h2 className="text-lg font-semibold text-slate-900">
+                Social links
+              </h2>
+
+              <p className="text-sm text-slate-500">
+                Manage your social media profiles.
               </p>
-            </label>
+            </div>
+          </div>
 
-            <label className="flex items-center justify-between rounded-xl border border-slate-200 px-4 py-3">
-              <div>
-                <p className="font-medium text-slate-900">Auto-save drafts</p>
-                <p className="text-sm text-slate-500">Keep work safe while editing pages.</p>
-              </div>
-              <input
-                type="checkbox"
-                checked={settings.autoSave}
-                onChange={(event) =>
-                  setSettings((prev) => ({ ...prev, autoSave: event.target.checked }))
+          <div className="grid gap-4 md:grid-cols-2">
+            {(
+              [
+                ["facebook", "Facebook"],
+                ["instagram", "Instagram"],
+                ["linkedin", "LinkedIn"],
+                ["twitter", "Twitter / X"],
+                ["youtube", "YouTube"],
+                ["github", "GitHub"],
+              ] as const
+            ).map(([key, label]) => (
+              <Input
+                key={key}
+                label={label}
+                value={settings.socialLinks[key]}
+                onChange={(e) =>
+                  setSettings((prev) => ({
+                    ...prev,
+                    socialLinks: {
+                      ...prev.socialLinks,
+                      [key]: e.target.value,
+                    },
+                  }))
                 }
-                className="h-5 w-5 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+              />
+            ))}
+          </div>
+        </section>
+
+        {/* SEO */}
+        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="mb-5 flex items-center gap-3">
+            <Search size={20} className="text-blue-600" />
+
+            <div>
+              <h2 className="text-lg font-semibold text-slate-900">
+                SEO
+              </h2>
+
+              <p className="text-sm text-slate-500">
+                Default metadata used by your website.
+              </p>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <Input
+              label="Default meta title"
+              value={settings.seo.defaultMetaTitle}
+              onChange={(e) =>
+                setSettings((prev) => ({
+                  ...prev,
+                  seo: {
+                    ...prev.seo,
+                    defaultMetaTitle: e.target.value,
+                  },
+                }))
+              }
+            />
+
+            <label className="block">
+              <span className="mb-2 block text-sm font-medium text-gray-700">
+                Default meta description
+              </span>
+
+              <textarea
+                rows={4}
+                value={settings.seo.defaultMetaDescription}
+                onChange={(e) =>
+                  setSettings((prev) => ({
+                    ...prev,
+                    seo: {
+                      ...prev.seo,
+                      defaultMetaDescription: e.target.value,
+                    },
+                  }))
+                }
+                className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm text-slate-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-300"
               />
             </label>
 
-            <label className="flex items-center justify-between rounded-xl border border-slate-200 px-4 py-3">
-              <div>
-                <p className="font-medium text-slate-900">Show helpful tips</p>
-                <p className="text-sm text-slate-500">Display quick suggestions for new team members.</p>
-              </div>
-              <input
-                type="checkbox"
-                checked={settings.showTips}
-                onChange={(event) =>
-                  setSettings((prev) => ({ ...prev, showTips: event.target.checked }))
+            <Input
+              label="Default OG image URL"
+              value={settings.seo.defaultOgImage.url}
+              onChange={(e) =>
+                setSettings((prev) => ({
+                  ...prev,
+                  seo: {
+                    ...prev.seo,
+                    defaultOgImage: {
+                      url: e.target.value,
+                    },
+                  },
+                }))
+              }
+            />
+          </div>
+        </section>
+
+        {/* BRANDING */}
+        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="mb-5">
+            <h2 className="text-lg font-semibold text-slate-900">
+              Branding
+            </h2>
+
+            <p className="text-sm text-slate-500">
+              Configure your website logo and favicon.
+            </p>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            <Input
+              label="Logo URL"
+              value={settings.logo.url}
+              onChange={(e) =>
+                setSettings((prev) => ({
+                  ...prev,
+                  logo: {
+                    url: e.target.value,
+                  },
+                }))
+              }
+            />
+
+            <Input
+              label="Favicon URL"
+              value={settings.favicon.url}
+              onChange={(e) =>
+                setSettings((prev) => ({
+                  ...prev,
+                  favicon: {
+                    url: e.target.value,
+                  },
+                }))
+              }
+            />
+          </div>
+        </section>
+
+        {/* FOOTER */}
+        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="mb-5 flex items-center gap-3">
+            <Link2 size={20} className="text-blue-600" />
+
+            <div>
+              <h2 className="text-lg font-semibold text-slate-900">
+                Footer
+              </h2>
+
+              <p className="text-sm text-slate-500">
+                Configure footer content and legal page links.
+              </p>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <Input
+              label="Copyright text"
+              value={settings.footer.copyrightText}
+              onChange={(e) =>
+                setSettings((prev) => ({
+                  ...prev,
+                  footer: {
+                    ...prev.footer,
+                    copyrightText: e.target.value,
+                  },
+                }))
+              }
+            />
+
+            <div className="grid gap-4 md:grid-cols-2">
+              <Input
+                label="Privacy policy URL"
+                value={settings.footer.privacyPolicyUrl}
+                onChange={(e) =>
+                  setSettings((prev) => ({
+                    ...prev,
+                    footer: {
+                      ...prev.footer,
+                      privacyPolicyUrl: e.target.value,
+                    },
+                  }))
                 }
-                className="h-5 w-5 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
               />
-            </label>
-          </section>
 
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <Button type="submit">Save settings</Button>
-
-            {saved && (
-              <div className="inline-flex items-center gap-2 text-sm font-medium text-green-600">
-                <CheckCircle2 size={16} />
-                Preferences saved
-              </div>
-            )}
+              <Input
+                label="Terms & conditions URL"
+                value={settings.footer.termsAndConditionsUrl}
+                onChange={(e) =>
+                  setSettings((prev) => ({
+                    ...prev,
+                    footer: {
+                      ...prev.footer,
+                      termsAndConditionsUrl: e.target.value,
+                    },
+                  }))
+                }
+              />
+            </div>
           </div>
-        </form>
+        </section>
 
-        <aside className="space-y-4 rounded-2xl border border-slate-200 bg-slate-50 p-6 shadow-sm">
-          <div className="flex items-center gap-2 text-lg font-semibold text-slate-900">
-            <ShieldCheck size={18} />
-            What this page covers
+        {/* SAVE */}
+        <div className="sticky bottom-4 z-10">
+          <div className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white/95 p-4 shadow-lg backdrop-blur sm:flex-row sm:items-center sm:justify-between">
+
+            <div>
+              <p className="text-sm font-medium text-slate-900">
+                Save your changes
+              </p>
+
+              <p className="text-xs text-slate-500">
+                Changes will be saved to the CMS backend.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-4">
+              {saved && (
+                <div className="inline-flex items-center gap-2 text-sm font-medium text-green-600">
+                  <CheckCircle2 size={16} />
+                  Settings saved
+                </div>
+              )}
+
+              <Button type="submit" disabled={saving}>
+                {saving ? "Saving..." : "Save settings"}
+              </Button>
+            </div>
           </div>
+        </div>
 
-          <ul className="space-y-3 text-sm text-slate-600">
-            <li>- General workspace information for admins and editors.</li>
-            <li>- Publishing defaults for new CMS pages.</li>
-            <li>- Small editing preferences to make the CMS easier to manage.</li>
-          </ul>
-
-          <div className="rounded-xl border border-blue-100 bg-blue-50 p-4 text-sm text-blue-700">
-            These values are saved locally in your browser so they stay available on this device.
+        {error && (
+          <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+            {error}
           </div>
-        </aside>
-      </div>
+        )}
+      </form>
+
+      {/* INFO */}
+      <aside className="rounded-2xl border border-slate-200 bg-slate-50 p-6">
+        <div className="flex items-center gap-2 text-lg font-semibold text-slate-900">
+          <ShieldCheck size={18} />
+          Settings information
+        </div>
+
+        <p className="mt-3 text-sm text-slate-600">
+          These settings are stored in the CMS backend and can be
+          used across the public website. Only authorized users should
+          be allowed to modify them.
+        </p>
+      </aside>
     </div>
   );
 }
