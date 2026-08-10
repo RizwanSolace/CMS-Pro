@@ -125,7 +125,7 @@ export default function PreviewPage() {
           <img
             src={featuredImageUrl}
             alt={page.title}
-            className="h-80 w-full rounded-2xl object-cover"
+            className="w-full max-h-[calc(100vh-8rem)] rounded-2xl object-contain"
           />
         ) : null}
 

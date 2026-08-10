@@ -271,7 +271,14 @@ export default function DashboardPage() {
             </div>
 
             <div className="divide-y divide-slate-200">
-              {pages.slice(0, 5).map((page: CmsPage) => (
+              {[...pages]
+  .sort(
+    (a, b) =>
+      new Date(b.updatedAt).getTime() -
+      new Date(a.updatedAt).getTime()
+  )
+  .slice(0, 5)
+  .map((page: CmsPage) => (
                 <div
                   key={page._id || page.id}
                   className="flex items-center justify-between gap-4 py-4"

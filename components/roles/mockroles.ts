@@ -42,4 +42,15 @@ export const mockRoles: Role[] = [
     users: 12,
  
   },
+  {
+    id: "4",
+    name: "User",
+    description: "Regular user with limited access",
+    permissions: [
+      "Profile",
+      "Settings",
+    ], 
+    users: 20,
+  }
+
 ];
