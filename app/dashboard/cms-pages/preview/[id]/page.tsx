@@ -56,7 +56,7 @@ export default function PreviewPage() {
   const handleSaveDraft = async () => {
     try {
       toast.success("Draft saved successfully.");
-    } catch (err) {
+    } catch (err:any) {
       console.error("Publish error:",err);
        const message =
       err?.response?.data?.message ||
