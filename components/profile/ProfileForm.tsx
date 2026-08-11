@@ -1,18 +1,23 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect,useRef, useState } from "react";
+import axios from "axios";
 import Button from "@/components/common/Button";
 import { authService } from "@/services/auth.service";
 import { userService } from "@/services/user.service";
-import { UserProfile } from "@/types/auth";
+import { UpdateProfilePayload, UserProfile } from "@/types/auth";
 
 export default function ProfileForm() {
+  const [updateError, setUpdateError] = useState("");
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [showRequestModal, setShowRequestModal] = useState(false);
 const [reason, setReason] = useState("");
+//const [originalPhone, setOriginalPhone] = useState("");
 const [requesting, setRequesting] = useState(false);
+const originalPhone = useRef<string>("");
+const originalName = useRef<string>("");
 
   useEffect(() => {
     fetchProfile();
@@ -22,6 +27,8 @@ const [requesting, setRequesting] = useState(false);
     try {
       const res = await authService.getProfile();
       setProfile(res.data);
+        originalName.current = res.data.name;
+    originalPhone.current = res.data.phone || "";
     } catch (error) {
       console.error(error);
     } finally {
@@ -29,48 +36,121 @@ const [requesting, setRequesting] = useState(false);
     }
   };
 
+  // const handleSubmit = async () => {
+  //   if (!profile) return;
+
+  //   setSaving(true);
+
+  //   try {
+  //     // const res = await authService.updateProfile({
+  //     //   name: profile.name,
+  //     //   phone: profile.phone,
+  //     // });
+  //      const payload: {
+  //     name?: string;
+  //     phone?: string;
+  //   } = {
+  //     name: profile.name,
+  //   };
+  //   //   if (profile.phone !== originalPhone) {
+  //   //   payload.phone = profile.phone;
+  //   // }
+
+  //   const res = await authService.updateProfile(payload);
+
+  //     setProfile(res.data);
+     
+  //        originalPhone.current = res.data.phone || "";
+
+  //     localStorage.setItem(
+  //       "user",
+  //       JSON.stringify(res.data)
+  //     );
+
+  //     alert("Profile updated successfully!");
+  //   } catch (error) {
+  //     console.error(error);
+  //     alert("Failed to update profile");
+  //   } finally {
+  //     setSaving(false);
+  //   }
+  // };
+
+  // if (loading) {
+  //   return (
+  //     <div className="rounded-xl bg-white p-8 shadow">
+  //       Loading profile...
+  //     </div>
+  //   );
+  // }
+
+  // if (!profile) {
+  //   return (
+  //     <div className="rounded-xl bg-white p-8 shadow">
+  //       Failed to load profile.
+  //     </div>
+  //   );
+  // }
   const handleSubmit = async () => {
-    if (!profile) return;
+  if (!profile) return;
 
-    setSaving(true);
+  const payload: UpdateProfilePayload = {};
 
-    try {
-      const res = await authService.updateProfile({
-        name: profile.name,
-        phone: profile.phone,
-      });
-
-      setProfile(res.data);
-
-      localStorage.setItem(
-        "user",
-        JSON.stringify(res.data)
-      );
-
-      alert("Profile updated successfully!");
-    } catch (error) {
-      console.error(error);
-      alert("Failed to update profile");
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="rounded-xl bg-white p-8 shadow">
-        Loading profile...
-      </div>
-    );
+  // Only send name if it actually changed
+  if (profile.name !== originalName.current) {
+    payload.name = profile.name;
   }
 
-  if (!profile) {
-    return (
-      <div className="rounded-xl bg-white p-8 shadow">
-        Failed to load profile.
-      </div>
-    );
+  // Only send phone if it actually changed
+  if (profile.phone !== originalPhone.current) {
+    payload.phone = profile.phone;
   }
+
+  // Nothing changed
+  if (Object.keys(payload).length === 0) {
+    alert("No changes to save.");
+    return;
+  }
+
+  setSaving(true);
+
+  try {
+    console.log("Original name:", originalName.current);
+    console.log("Current name:", profile.name);
+    console.log("Original phone:", originalPhone.current);
+    console.log("Current phone:", profile.phone);
+    console.log("Update payload:", payload);
+
+    const res = await authService.updateProfile(payload);
+
+    setProfile(res.data);
+
+    // Update original values after successful save
+    originalName.current = res.data.name;
+    originalPhone.current = res.data.phone || "";
+
+    localStorage.setItem(
+      "user",
+      JSON.stringify(res.data)
+    );
+
+    alert("Profile updated successfully!");
+  } catch (error) {
+    console.error(error);
+   
+  if (axios.isAxiosError(error)) {
+    const message =
+      error.response?.data?.message ||
+      "Failed to update profile";
+
+    setUpdateError(message);
+  } else {
+    setUpdateError("Failed to update profile");
+  }
+  } finally {
+    setSaving(false);
+  }
+};
   const handleRequestAdmin = async (reason:string ) => {
   try {
     await userService.requestAdmin(reason);
@@ -81,48 +161,63 @@ const [requesting, setRequesting] = useState(false);
     alert("Failed to submit request.");
   }
 };
+if (loading) {
+  return (
+    <div className="rounded-xl bg-white p-8 shadow">
+      Loading profile...
+    </div>
+  );
+}
+
+if (!profile) {
+  return (
+    <div className="rounded-xl bg-white p-8 shadow">
+      Failed to load profile.
+    </div>
+  );
+}
 
   return (
     <div className="rounded-2xl bg-white p-8 shadow">
       <div className="mb-8 flex items-center gap-6">
         <div className="flex h-24 w-24 items-center justify-center rounded-full bg-blue-600 text-3xl font-bold text-white">
-          {profile.name.charAt(0).toUpperCase()}
+          {profile?.name.charAt(0).toUpperCase()}
         </div>
 
         <div>
           <h2 className="text-2xl font-bold">
-            {profile.name}
+            {profile?.name}
           </h2>
 
           <p className="text-slate-500">
-            {profile.email}
+            {profile?.email}
           </p>
 
           <div className="mt-3 flex gap-2">
             <span className="rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-700">
-              {profile.role}
+              {profile?.role}
             </span>
 
             <span
               className={`rounded-full px-3 py-1 text-sm font-medium ${
-                profile.isVerified
+                profile?.isVerified
                   ? "bg-green-100 text-green-700"
                   : "bg-red-100 text-red-700"
               }`}
             >
-              {profile.isVerified
+              {profile?.isVerified
                 ? "Verified"
                 : "Not Verified"}
             </span>
 
             <span
               className={`rounded-full px-3 py-1 text-sm font-medium ${
-                profile.isActive
+                profile?.isActive
                   ? "bg-green-100 text-green-700"
                   : "bg-yellow-100 text-yellow-700"
               }`}
             >
-              {profile.isActive
+              {profile?.isActive
                 ? "Active"
                 : "Inactive"}
             </span>
@@ -138,7 +233,7 @@ const [requesting, setRequesting] = useState(false);
 
           <input
             type="text"
-            value={profile.name}
+            value={profile?.name}
             onChange={(e) =>
               setProfile({
                 ...profile,
@@ -156,7 +251,7 @@ const [requesting, setRequesting] = useState(false);
 
           <input
             type="email"
-            value={profile.email}
+            value={profile?.email}
             readOnly
             className="w-full rounded-xl bg-slate-100 p-3"
           />
@@ -169,7 +264,7 @@ const [requesting, setRequesting] = useState(false);
 
           <input
             type="text"
-            value={profile.phone}
+            value={profile?.phone}
             onChange={(e) =>
               setProfile({
                 ...profile,
@@ -187,7 +282,7 @@ const [requesting, setRequesting] = useState(false);
 
           <input
             type="text"
-            value={profile.role}
+            value={profile?.role}
             readOnly
             className="w-full rounded-xl bg-slate-100 p-3"
           />
@@ -202,7 +297,7 @@ const [requesting, setRequesting] = useState(false);
           <input
             type="text"
             value={new Date(
-              profile.lastLogin
+              profile?.lastLogin
             ).toLocaleString()}
             readOnly
             className="w-full rounded-xl bg-slate-100 p-3"
@@ -217,7 +312,7 @@ const [requesting, setRequesting] = useState(false);
           <input
             type="text"
             value={new Date(
-              profile.createdAt
+              profile?.createdAt
             ).toLocaleDateString()}
             readOnly
             className="w-full rounded-xl bg-slate-100 p-3"
@@ -260,7 +355,11 @@ const [requesting, setRequesting] = useState(false);
         >
           Cancel
         </Button>
-
+{updateError && (
+    <div className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+      {updateError}
+    </div>
+  )}
         <Button
           disabled={requesting}
           onClick={() => handleRequestAdmin(reason)}

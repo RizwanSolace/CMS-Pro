@@ -96,8 +96,8 @@ export interface UserProfileResponse {
   data: UserProfile;
 }
 export interface UpdateProfilePayload {
-  name: string;
-  phone: string;
+  name?: string;
+  phone?: string;
 }
 
 export interface UpdateProfileResponse {

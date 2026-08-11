@@ -3,6 +3,8 @@
 import {
   ArrowRight,
   CheckCircle2,
+  Settings,
+  Images,
   Clock3,
   Edit3,
   FileText,
@@ -91,7 +93,24 @@ export default function DashboardPage() {
         effectiveRole === "EDITOR" || effectiveRole === "USER"
           ? "Work on drafts and keep assigned pages fresh."
           : "Review drafts, publish pages, and maintain content.",
+          
     },
+    (effectiveRole === "ADMIN" ||
+  effectiveRole === "SUPER_ADMIN" ||
+  effectiveRole === "EDITOR") && {
+  href: "/dashboard/media",
+  icon: Images,
+  title: "Media Library",
+  description: "Upload, organize, and manage your media files.",
+},
+ (effectiveRole === "ADMIN" ||
+  effectiveRole === "SUPER_ADMIN" 
+ ) && {
+  href: "/dashboard/settings",
+  icon: Settings,
+  title: "Settings",
+  description: "Manage your application settings.",
+},
     canManageUsers && {
       href: "/dashboard/users",
       icon: Users,
