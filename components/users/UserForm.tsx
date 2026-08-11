@@ -36,10 +36,126 @@ export default function UserForm({
     password: "",
   confirmPassword: "",
 });
+
+
+const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+const passwordPattern =
+  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$/;
+
+const focusField = (field: string) => {
+  const element = document.getElementById(field);
+
+  if (element) {
+    element.focus();
+    element.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+    });
+  }
+};
+
+const updateField = (field: string, value: string | boolean) => {
+  setFormData((prev) => ({
+    ...prev,
+    [field]: value,
+  }));
+
+  setFieldErrors((prev) => {
+    if (!prev[field]) return prev;
+
+    const next = { ...prev };
+    delete next[field];
+    return next;
+  });
+};
+
+const validateForm = () => {
+  const errors: Record<string, string> = {};
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const phonePattern = /^\d{10}$/;
+
+  if (!formData.name.trim()) {
+    errors.name = "Name is required.";
+  }
+
+  if (!formData.email.trim()) {
+    errors.email = "Email address is required.";
+  } else if (!emailPattern.test(formData.email.trim())) {
+    errors.email = "Please enter a valid email address.";
+  }
+
+  if (!formData.phone.trim()) {
+    errors.phone = "Phone number is required.";
+  } else if (!phonePattern.test(formData.phone.trim())) {
+    errors.phone = "Phone number must be 10 digits.";
+  }
+
+  if (!["ADMIN", "EDITOR"].includes(formData.role)) {
+    errors.role = "Please select a role.";
+  }
+
+  if (!isEdit) {
+    if (!formData.password) {
+      errors.password = "Password is required.";
+    } else if (!passwordPattern.test(formData.password)) {
+      errors.password =
+        "Password must be at least 8 characters and include uppercase, lowercase, number, and special character.";
+    }
+
+    if (!formData.confirmPassword) {
+      errors.confirmPassword = "Please confirm the password.";
+    } else if (formData.password !== formData.confirmPassword) {
+      errors.confirmPassword = "Passwords do not match.";
+    }
+  }
+
+  return errors;
+};
+
+const getBackendFieldErrors = (data: any) => {
+  const errors: Record<string, string> = {};
+
+  if (Array.isArray(data?.errors)) {
+    data.errors.forEach((error: any) => {
+      const rawField = error.field || error.path || error.param;
+      const message = error.message || error.msg;
+
+      if (rawField && message) {
+        const field = rawField.replace(/^body\./, "");
+        errors[field] = message;
+      }
+    });
+  } else if (data?.errors && typeof data.errors === "object") {
+    Object.entries(data.errors).forEach(([rawField, value]) => {
+      const field = rawField.replace(/^body\./, "");
+      const message = Array.isArray(value) ? value[0] : value;
+
+      if (typeof message === "string") {
+        errors[field] = message;
+      }
+    });
+  }
+
+  return errors;
+};
+
 const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
   e.preventDefault();
 
   try {
+    const validationErrors = validateForm();
+
+    if (Object.keys(validationErrors).length > 0) {
+      const firstField = Object.keys(validationErrors)[0];
+
+      setFieldErrors(validationErrors);
+      focusField(firstField);
+      toast.error(validationErrors[firstField]);
+      return;
+    }
+
+    setFieldErrors({});
+
     if (isEdit) {
       if (!user) return;
 
@@ -90,12 +206,33 @@ const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     await onRefresh();
     onCancel();
   } catch (err: any) {
-    console.error(err);
-    const errorMessage =
-      err?.response?.data?.message || err?.message || "Failed to save user.";
-    toast.error(errorMessage);
+  console.error(err);
+
+  const data = err?.response?.data;
+
+  setFieldErrors({});
+
+  const errors = getBackendFieldErrors(data);
+
+  if (Object.keys(errors).length > 0) {
+    setFieldErrors(errors);
+
+    const firstField = Object.keys(errors)[0];
+
+    if (firstField) {
+      focusField(firstField);
+      toast.error(errors[firstField]);
+      return;
+    }
   }
-};
+
+  toast.error(
+    data?.message ||
+    err?.message ||
+    "Failed to save user."
+  );
+}
+ }
 
   return (
     <form className="space-y-6" onSubmit={handleSubmit}>
@@ -103,16 +240,12 @@ const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <Input
-          id="Name"
+          id="name"
           label="Name"
             value={formData.name}
           placeholder="John"
-  onChange={(e) =>
-        setFormData({
-            ...formData,
-            name: e.target.value,
-        })
-    }
+  onChange={(e) => updateField("name", e.target.value)}
+          error={fieldErrors.name}
           required
         />
 
@@ -129,12 +262,8 @@ const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
        value={formData.email}
 
          
-  onChange={(e) =>
-    setFormData({
-      ...formData,
-      email: e.target.value,
-    })
-  }
+  onChange={(e) => updateField("email", e.target.value)}
+        error={fieldErrors.email}
         required
       />
 
@@ -147,14 +276,9 @@ const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         required
          
          value={formData.phone}
-onChange={(e) =>
-  setFormData({
-    ...formData,
-    phone: e.target.value,
-  })
-}
+onChange={(e) => updateField("phone", e.target.value)}
+        error={fieldErrors.phone}
       />
-
       {/* Role & Status */}
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -163,17 +287,19 @@ onChange={(e) =>
             Role
           </label>
 
-          <select className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-600" value={formData.role} onChange={(e) =>
-        setFormData({
-            ...formData,
-            role: e.target.value,
-        })
-    }> 
-          
+          <select id="role" className={`w-full rounded-xl border px-4 py-3 outline-none focus:border-blue-600 ${
+            fieldErrors.role ? "border-red-500" : "border-slate-300"
+          }`} value={formData.role} onChange={(e) => updateField("role", e.target.value)}> 
+             <option value="DEFAULT">Select Role</option>       
             <option value="ADMIN">Admin</option>
             <option value="EDITOR">Editor</option>
            
           </select>
+          {fieldErrors.role && (
+            <p className="mt-1 text-sm text-red-600">
+              {fieldErrors.role}
+            </p>
+          )}
         </div>
 
         <div>
@@ -181,12 +307,7 @@ onChange={(e) =>
             Status
           </label>
 
-          <select className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-600"  onChange={(e) =>
-        setFormData({
-            ...formData,
-            status: e.target.value,
-        })
-    } value={formData.status}>
+          <select className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-600"  onChange={(e) => updateField("status", e.target.value)} value={formData.status}>
              
             <option value="ACTIVE">Active</option>
             <option value="INACTIVE">Inactive</option>
@@ -204,13 +325,15 @@ onChange={(e) =>
             placeholder="Enter password"
             required
             value={formData.password}
-  onChange={(e) =>
-    setFormData({
-      ...formData,
-      password: e.target.value,
-    })
-  }
+  onChange={(e) => updateField("password", e.target.value)}
+            error={fieldErrors.password}
           />
+            <p className="mt-2 text-xs text-slate-500">
+    Password must contain at least 8 characters, including
+    uppercase and lowercase letters, a number, and a special
+    character.
+  </p>
+
 
           <PasswordInput
             id="confirmPassword"
@@ -218,16 +341,11 @@ onChange={(e) =>
             placeholder="Confirm password"
             required
             value={formData.confirmPassword}
-            onChange={(e) =>
-              setFormData({
-                ...formData,
-                confirmPassword: e.target.value,
-              })
-            }
+            onChange={(e) => updateField("confirmPassword", e.target.value)}
+            error={fieldErrors.confirmPassword}
           />
         </>
       )}
-
       {/* Footer */}
 
       <div className="flex justify-end gap-3 border-t border-slate-200 pt-6">
