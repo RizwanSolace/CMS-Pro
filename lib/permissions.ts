@@ -25,6 +25,7 @@ export const rolePermissions: Record<Role, string[]> = {
     "dashboard",
     "users:view",
     "users:update",
+    "users:delete",
     "users:activate",
     "cms:crud",
     "builder",

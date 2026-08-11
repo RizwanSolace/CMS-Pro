@@ -123,7 +123,7 @@ export default function UserActionMenu( { onView, onEdit, onDelete, targetUserRo
               </button>
             )}
 
-            {can("users:crud") && !(role !== "SUPER_ADMIN" && targetUserRole === "SUPER_ADMIN") && (
+            {can("users:delete") && !(role !== "SUPER_ADMIN" && targetUserRole === "SUPER_ADMIN") && (
               <button className="flex w-full items-center gap-3 px-4 py-2 text-red-600 hover:bg-red-50" onClick={() => handleAction(onDelete)}>
                 <Trash2 size={16} />
                 Delete
