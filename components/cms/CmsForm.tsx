@@ -605,24 +605,19 @@ export default function CmsForm({ mode, initialData, onSubmit }: CmsFormProps) {
         </div>
       </div>
 
-      <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-        <label className="mb-2 block text-sm font-medium text-slate-700">Status</label>
+     <div>
+  <label className="mb-2 block text-sm font-medium text-slate-700">
+    Status
+  </label>
 
-        {mode === "add" ? (
-          <div className="w-full rounded-xl border border-slate-300 bg-slate-100 px-4 py-3 text-slate-500">
-            Draft <span className="text-xs">(new pages always start as draft)</span>
-          </div>
-        ) : (
-          <select
-            name="status"
-            className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-600"
-            defaultValue={initialData?.status ?? "Draft"}
-          >
-            <option>Draft</option>
-            {canPublish && <option>Published</option>}
-          </select>
-        )}
-      </div>
+  <div className="w-full rounded-xl border border-slate-300 bg-slate-100 px-4 py-3 text-slate-500">
+    Draft
+    <span className="text-xs">
+      {" "}
+      (pages can only be saved as draft)
+    </span>
+  </div>
+</div>
 
       <div className="flex justify-end">
         <Button type="submit" disabled={uploading}>

@@ -244,7 +244,12 @@ const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
           label="Name"
             value={formData.name}
           placeholder="John"
-  onChange={(e) => updateField("name", e.target.value)}
+  onChange={(e) =>
+    updateField(
+      "name",
+      e.target.value.replace(/[^a-zA-Z\s]/g, "")
+    )
+  }
           error={fieldErrors.name}
           required
         />
@@ -276,20 +281,27 @@ const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         required
          
          value={formData.phone}
-onChange={(e) => updateField("phone", e.target.value)}
+  onChange={(e) =>
+    updateField(
+      "phone",
+      e.target.value.replace(/\D/g, "").slice(0, 10)
+    )
+  }
         error={fieldErrors.phone}
+        maxLength={10}
+        
       />
       {/* Role & Status */}
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div>
           <label className="mb-2 block text-sm font-medium text-slate-700">
-            Role
+            Role <span className="text-red-500">*</span>
           </label>
 
           <select id="role" className={`w-full rounded-xl border px-4 py-3 outline-none focus:border-blue-600 ${
             fieldErrors.role ? "border-red-500" : "border-slate-300"
-          }`} value={formData.role} onChange={(e) => updateField("role", e.target.value)}> 
+          }`} value={formData.role} onChange={(e) => updateField("role", e.target.value)} required>
              <option value="DEFAULT">Select Role</option>       
             <option value="ADMIN">Admin</option>
             <option value="EDITOR">Editor</option>
