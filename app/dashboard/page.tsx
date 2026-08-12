@@ -222,15 +222,15 @@ export default function DashboardPage() {
           <div>
             <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1 text-sm font-medium text-blue-700">
               <Sparkles size={16} />
-              {getRoleLabel(normalizedRole)} workspace
+              {getRoleLabel(normalizedRole || role)} workspace
             </div>
 
             <h2 className="text-2xl font-bold text-slate-900">
-              {getDashboardTitle(normalizedRole)}
+              {getDashboardTitle(normalizedRole || role)}
             </h2>
 
             <p className="mt-2 max-w-2xl text-slate-500">
-              {getDashboardDescription(normalizedRole)}
+              {getDashboardDescription(normalizedRole || role)}
             </p>
           </div>
 
@@ -369,19 +369,20 @@ export default function DashboardPage() {
   );
 }
 
-function getRoleLabel(role: string) {
+function getRoleLabel(role: string | undefined) {
+  if (!role) return "User";
   return role.replace(/_/g, " ").toLowerCase().replace(/\b\w/g, (char) =>
     char.toUpperCase()
   );
 }
 
-function getDashboardTitle(role: string) {
+function getDashboardTitle(role: string | undefined) {
   if (role === "EDITOR") return "Focus on content that needs your attention";
   if (role === "ADMIN") return "Manage users and keep content moving";
   return "Keep content, users, and permissions organized";
 }
 
-function getDashboardDescription(role: string) {
+function getDashboardDescription(role: string | undefined) {
   if (role === "EDITOR") {
     return "Create drafts, update assigned pages, and continue content work from one focused place.";
   }

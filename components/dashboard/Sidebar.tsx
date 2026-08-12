@@ -17,10 +17,20 @@ import {
 import clsx from "clsx";
 import { useRouter } from "next/navigation";
 import useAuth from "@/hooks/useAuth";
+import { useProfile } from "@/hooks/useProfile";
 
 interface SidebarProps {
   mobileOpen?: boolean;
   onClose?: () => void;
+}
+
+function normalizeRole(role: string | undefined | null) {
+  if (!role) return role;
+  return role
+    .toString()
+    .trim()
+    .replace(/\s+/g, "_")
+    .toUpperCase();
 }
 
 const menus = [
@@ -78,12 +88,17 @@ export default function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const { role, normalizedRole } = useAuth() as any;
+  const { profile } = useProfile();
+  
+  // Use fresh profile data from API for role display
+  const currentRole = profile?.role || role;
+  const currentNormalizedRole = profile ? (profile as any)?.normalizedRole || normalizeRole(profile.role) : normalizedRole;
 
   const visibleMenus = menus.filter((m) => {
     if (!m.roles) return true;
 
-    const hasOriginalRole = role ? m.roles.includes(role) : false;
-    const hasNormalizedRole = normalizedRole ? m.roles.includes(normalizedRole) : false;
+    const hasOriginalRole = currentRole ? m.roles.includes(currentRole) : false;
+    const hasNormalizedRole = currentNormalizedRole ? m.roles.includes(currentNormalizedRole) : false;
 
     return hasOriginalRole || hasNormalizedRole;
   });
@@ -103,7 +118,7 @@ const handleLogout = () => {
         </h2>
 
         <p className="mt-1 text-sm text-slate-500">
-          {role ?? normalizedRole} Panel
+          {currentRole ?? currentNormalizedRole} Panel
         </p>
       </div>
 
