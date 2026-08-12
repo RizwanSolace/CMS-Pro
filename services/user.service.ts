@@ -85,7 +85,7 @@ requestAdmin(reason: string) {
   });
 },
 getMyAdminRequest: async () => {
-  const response = await api.get("/admin-requests/me");
+  const response = await api.get("/requestAdmin/me");
   return response.data;
 },
 }
