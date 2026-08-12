@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { cmsService } from "@/services/cms.service";
 import { toast } from "react-toastify";
+import Input from "@/components/common/Input";
 
 interface UploadMediaModalProps {
   isOpen: boolean;
@@ -57,7 +58,7 @@ export default function UploadMediaModal({
           Upload Media
         </h2>
 
-        <input
+        <Input
           type="file"
           accept="image/png,image/jpeg,image/webp"
           onChange={(e) =>

@@ -6,6 +6,7 @@ import Button from "@/components/common/Button";
 import { authService } from "@/services/auth.service";
 import { userService } from "@/services/user.service";
 import { UpdateProfilePayload, UserProfile } from "@/types/auth";
+import { request } from "https";
 
 export default function ProfileForm() {
   const [updateError, setUpdateError] = useState("");
@@ -18,10 +19,37 @@ const [reason, setReason] = useState("");
 const [requesting, setRequesting] = useState(false);
 const originalPhone = useRef<string>("");
 const originalName = useRef<string>("");
+const [adminRequest, setAdminRequest] = useState<any>(null);
+const [adminRequestLoading, setAdminRequestLoading] = useState(true);
 
   useEffect(() => {
     fetchProfile();
+     fetchAdminRequest();
   }, []);
+  const fetchAdminRequest = async () => {
+  try {
+    const res = await userService.getMyAdminRequest();
+      console.log("ADMIN REQUEST API RESPONSE:", res);
+    console.log("ADMIN REQUEST DATA:", res?.data);
+
+    setAdminRequest(res?.data ?? res);
+    console.log("FINAL ADMIN REQUEST:", request);
+  } catch (error: any) {
+    // 404 can simply mean the user has never requested admin access
+   console.error("Failed to fetch admin request:", error);
+    console.log("STATUS:", error?.response?.status);
+    console.log("RESPONSE:", error?.response?.data);
+
+    if (error?.response?.status !== 404) {
+      console.error("Admin request API failed:", error);
+    }
+
+
+    setAdminRequest(null);
+  } finally {
+    setAdminRequestLoading(false);
+  }
+};
 
   const fetchProfile = async () => {
     try {
@@ -152,8 +180,28 @@ const originalName = useRef<string>("");
   }
 };
   const handleRequestAdmin = async (reason:string ) => {
+    if (!reason.trim()) {
+    alert("Please provide a reason.");
+    return;
+  }
+  setRequesting(true);
   try {
-    await userService.requestAdmin(reason);
+ const res=await userService.requestAdmin(reason);
+  setAdminRequest(res?.data ?? res);
+      setShowRequestModal(false);
+
+    // Clear textarea
+    setReason("");
+    // if (res?.data) {
+    //   setProfile((prev) =>
+    //     prev
+    //       ? {
+    //           ...prev,
+    //           ...res.data,
+    //         }
+    //       : prev
+    //   );
+    // }
 
     alert("Admin request submitted successfully.");
   } catch (error) {
@@ -319,7 +367,7 @@ if (!profile) {
           />
         </div>
       </div>
-      {profile.role === "EDITOR" && (
+      {/* {profile.role === "EDITOR" && (
   <Button
     variant="secondary"
     className="m-4"
@@ -327,6 +375,77 @@ if (!profile) {
   >
     Request Admin Access
   </Button>
+)} */}
+{profile.role === "EDITOR" && !adminRequestLoading && (
+  <div className="mt-6">
+
+    {/* No request yet */}
+    {!adminRequest && (
+      <Button
+        variant="secondary"
+        onClick={() => {
+          setReason("");
+          setShowRequestModal(true);
+        }}
+      >
+        Request Admin Access
+      </Button>
+    )}
+
+    {/* Pending */}
+    {adminRequest?.status === "PENDING" && (
+      <div className="rounded-xl border border-yellow-200 bg-yellow-50 p-4">
+        <p className="font-semibold text-yellow-800">
+          Admin request pending
+        </p>
+
+        <p className="mt-1 text-sm text-yellow-700">
+          Your request is currently waiting for administrator approval.
+        </p>
+      </div>
+    )}
+
+    {/* Rejected */}
+    {adminRequest?.status === "REJECTED" && (
+      <div className="rounded-xl border border-red-200 bg-red-50 p-4">
+        <p className="font-semibold text-red-800">
+          Admin request rejected
+        </p>
+
+        <p className="mt-2 text-sm text-red-700">
+          <span className="font-medium">
+            Rejection reason:
+          </span>{" "}
+          {adminRequest.reason || "No reason provided."}
+        </p>
+
+        <Button
+          variant="secondary"
+          className="mt-4"
+          onClick={() => {
+            setReason("");
+            setShowRequestModal(true);
+          }}
+        >
+          Apply Again
+        </Button>
+      </div>
+    )}
+
+    {/* Approved */}
+    {adminRequest?.status === "APPROVED" && (
+      <div className="rounded-xl border border-green-200 bg-green-50 p-4">
+        <p className="font-semibold text-green-800">
+          Admin request approved
+        </p>
+
+        <p className="mt-1 text-sm text-green-700">
+          Your request for Admin access has been approved.
+        </p>
+      </div>
+    )}
+
+  </div>
 )}
   
 {showRequestModal && (
